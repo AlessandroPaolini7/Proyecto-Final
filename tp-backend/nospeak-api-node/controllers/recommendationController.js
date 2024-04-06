@@ -1,7 +1,7 @@
-const Recomendacion = require('../models/recomendacion');
+const Recommendation = require('../models/recommendation');
 
 
-exports.createRecomendacion = async (req, res) => {
+exports.createRecommendation = async (req, res) => {
 //     const fs = require('fs');
 // const Papa = require('papaparse');
 // const natural = require('natural');

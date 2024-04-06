@@ -23,6 +23,7 @@ app.use(cors({
 
 app.use('/api', apiRoutes); 
 const PORT = process.env.PORT || 9000;
-app.listen(PORT, () => {
-  console.log(`Servidor en funcionamiento en el puerto ${PORT}`);
+const HOST = process.env.HOST || 'localhost';
+app.listen(PORT, HOST, () => {
+  console.log(`Servidor en funcionamiento en http://${HOST}:${PORT}`);
 });
