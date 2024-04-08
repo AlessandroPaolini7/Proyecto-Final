@@ -17,9 +17,11 @@ mongoose.connection.on('connected', () => {
 app.use(express.json());
 
 app.use(cors({
-  origin: 'https://nospeak-client.vercel.app', 
+  origin: 'http://localhost:3000', 
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 }));
+// agregado para que el servidor pueda recibir peticiones de origen local sin problemas de cors
 
 app.use('/api', apiRoutes); 
 const PORT = process.env.PORT || 9000;

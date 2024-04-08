@@ -13,6 +13,8 @@ import { useState, useEffect } from 'react';
 import Library from './pages/MyLibrary/Library';
 import Artist from './pages/Artist/Artist';
 import Album from './pages/Album/Album';
+import RecommendedUsers from './pages/RecommendedUsers/RecommendedUsers';
+import FollowingUsers from './pages/FollowingUsers/FollowingUsers';
 import { useSelector } from 'react-redux';
 import axios from './interceptors/axiosConfig';
 
@@ -44,6 +46,9 @@ function App() {
             <Route path="/artist/:artistId" element={<Artist  client={axios} />} />
             <Route path="/song/:songId" element={<Song client={axios}/>} />
             <Route path="/album/:albumId" element={<Album  client={axios} />} />
+            <Route path="/recommended-users" element={<RecommendedUsers  client={axios} />} /> 
+            <Route path="/following-users" element={<FollowingUsers  client={axios} />} />
+            {/* En estas ult 2 rutas faltaria pasarle el id de usuario para tener las busquedas personalizadas x usuario, pero esto es un mero bosquejo de frontend */}
           </Routes>
         </Router>
       </div>

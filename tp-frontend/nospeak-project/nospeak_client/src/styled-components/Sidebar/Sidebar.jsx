@@ -5,6 +5,8 @@ import HomeIcon from '@mui/icons-material/Home';
 import SearchIcon from '@mui/icons-material/Search';
 import { Navigate, useLocation } from "react-router-dom";
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
+import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
+import GroupIcon from '@mui/icons-material/Group';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import axios from '../../interceptors/axiosConfig.js';
@@ -19,7 +21,8 @@ export default function Sidebar() {
   const [goToLibrary, setGoToLibrary] = React.useState(false);
   const [showNavbar, setShowNavbar] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  
+  const [goToRecommendedUsers, setGoToRecommendedUsers] = React.useState(false);
+  const [goToFollowing, setGoToFollowing] = React.useState(false);
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -63,6 +66,12 @@ export default function Sidebar() {
   if (goToLibrary && location.pathname !== "/library"){
     return <Navigate to="/library" />;
   }
+  if (goToRecommendedUsers && location.pathname !== "/recommended-users"){
+    return <Navigate to="/recommended-users" />;
+  }
+  if (goToFollowing && location.pathname !== "/following-users"){
+    return <Navigate to="/following-users" />;
+  }
 
   return (
     <>
@@ -73,6 +82,8 @@ export default function Sidebar() {
             <SidebarChoice  Icon={HomeIcon} onClick={() => setGoToHome(true)} />
             <SidebarChoice  Icon={SearchIcon} onClick={() => setGoToSearch(true)} />
             <SidebarChoice  onClick={() => setGoToLibrary(true)} Icon={LibraryMusicIcon} />
+            <SidebarChoice  Icon={ConnectWithoutContactIcon} onClick={() => setGoToRecommendedUsers(true)} />
+            <SidebarChoice Icon={GroupIcon} onClick={() => setGoToRecommendedUsers(true)} />
           </ChoicesContainer>
         </NavContainer>
       ) : (
@@ -81,6 +92,8 @@ export default function Sidebar() {
           <SidebarChoice title="Home" Icon={HomeIcon} onClick={() => setGoToHome(true)} />
           <SidebarChoice title="Search" Icon={SearchIcon} onClick={() => setGoToSearch(true)} />
           <SidebarChoice title="Library" onClick={() => setGoToLibrary(true)} Icon={LibraryMusicIcon} />
+          <SidebarChoice title="People like you" Icon={ConnectWithoutContactIcon} onClick={() => setGoToRecommendedUsers(true)} />
+          <SidebarChoice title="Following" Icon={GroupIcon} onClick={() => setGoToFollowing(true)} />
           <br />
           <br />
           <Playlists>PLAYLISTS</Playlists>
