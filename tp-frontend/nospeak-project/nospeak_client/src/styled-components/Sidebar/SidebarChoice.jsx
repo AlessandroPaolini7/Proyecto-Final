@@ -6,7 +6,7 @@ const SidebarChoice = ({title,Icon, onClick}) => {
     return (
         <Choices onClick={onClick}>
             {Icon && <Icon/> }
-            {Icon ? <h4>{title}</h4> : <p>{title}</p>}
+            {Icon ? <h4 style={{marginLeft:'5px'}}>{title}</h4> : <p>{title}</p>}
         </Choices>
     )
 }

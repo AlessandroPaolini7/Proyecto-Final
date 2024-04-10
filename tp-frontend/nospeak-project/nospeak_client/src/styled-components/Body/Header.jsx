@@ -6,24 +6,24 @@ import { Navigate, useLocation } from 'react-router-dom';
 import {useSelector} from 'react-redux';
 
 
-const Header = ({ songs, setFilteredSongs }) => {
+const Header = ({ users, setFilteredUsers, songs, setFilteredSongs }) => {
     const [goToAccount, setGoToAccount] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const location = useLocation();
     const user = useSelector(state => state.user.user);
-
     React.useEffect(() => {
-        if (location.pathname !== "/library" && location.pathname !== "/search") {
-            setFilteredSongs(songs);
+        if (location.pathname === "/library" && location.pathname !== "/search" && location.pathname !== "/recommended-users" && location.pathname !== "/following-users") {
+          setFilteredSongs(songs);
+          setFilteredUsers([]);
         }
-    }, [songs]);
-
+      }, [setFilteredUsers, songs]);
+      
     if (goToAccount) {
         return <Navigate to="/account" />;
     }
 
     const handleSearch = (e) => {
-        if (location.pathname !== "/library") {
+        if (location.pathname !== "/library" && location.pathname !== "/recommended-users" && location.pathname !== "/following-users") {
             const searchText = e.target.value;
             setSearchTerm(searchText);
 
@@ -34,7 +34,16 @@ const Header = ({ songs, setFilteredSongs }) => {
             );
 
             setFilteredSongs(filteredSongs);
-        } 
+        }
+        if (location.pathname === "/recommended-users" || location.pathname === "/following-users") {
+            const searchText = e.target.value;
+            setSearchTerm(searchText);
+
+            const filteredUsers = users.filter((user) =>
+              user.name.toLowerCase().includes(searchText.toLowerCase())
+            );
+            setFilteredUsers(filteredUsers);
+          } 
     };
 
     return (
@@ -43,7 +52,7 @@ const Header = ({ songs, setFilteredSongs }) => {
                 <SearchIcon style={{ color: 'white' }} />
                 <SearchInput
                     type="text"
-                    placeholder="Search for artist, song, or album"
+                    placeholder="Search for artist, song, or user"
                     value={searchTerm}
                     onChange={handleSearch}
                 />
