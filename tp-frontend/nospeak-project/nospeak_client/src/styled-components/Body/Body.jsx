@@ -15,7 +15,6 @@ import axios from '../../interceptors/axiosConfig.js';
 
 export default function Body({ client }) {
     const [filteredSongs, setFilteredSongs] = useState([]);
-
     const [songs, setSongs] = React.useState([]);
 
     const [deleteAlertData, setDeleteAlertData] = React.useState(null);
