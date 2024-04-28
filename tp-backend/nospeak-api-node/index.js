@@ -17,7 +17,7 @@ mongoose.connection.on('connected', () => {
 app.use(express.json());
 
 app.use(cors({
-  origin: 'https://nospeak-client.vercel.app', 
+  origin: ['https://nospeak-client.vercel.app', 'http://localhost:3000'],
   credentials: true,
 }));
 

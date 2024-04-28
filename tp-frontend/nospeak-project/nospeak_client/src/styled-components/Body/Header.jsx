@@ -60,7 +60,7 @@ const Header = ({ users, setFilteredUsers, songs, setFilteredSongs }) => {
             <HeaderRight>
                 <Avatar />
                 <h4 style={{ color: 'white' }} onClick={() => setGoToAccount(true)}>
-                    {user.nombre}
+                    {user.name}
                 </h4>
             </HeaderRight>
         </HeaderContainer>

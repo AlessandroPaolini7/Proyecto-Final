@@ -4,7 +4,6 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import FavoriteIcon from '@mui/icons-material/Favorite';
 import { 
     cardStyle, 
     TitleContainer, 
@@ -17,20 +16,30 @@ import {
 } from './styles';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import Rating from '@mui/material/Rating';
+import StarIcon from '@mui/icons-material/Star';
+import CommentIcon from '@mui/icons-material/Comment';
 
-
-
-
-export default function MediaControlCard({client, songs, setSongs, setDeleteAlertData}) {
+export default function MediaControlCard({client, songs, setSongs, setDeleteAlertData, setReviewAlertData}) {
     const user = useSelector((state) => state.user.user);
     const [userHistorial, setUserHistorial] = useState(null);
-
+    const [value, setValue] = useState(2);
+    const [hover, setHover] = useState(-1);
 
     const handleDelete = (songId, index) => {
         const songToDelete = songs[index];
         setDeleteAlertData({
           songId: songToDelete._id,
-          songTitle: songToDelete.titulo,
+          songTitle: songToDelete.title,
+          indexToRemove: index,
+        });
+      };
+
+      const handleReview = (songId, index) => {
+        const songToReview = songs[index];
+        setReviewAlertData({
+          songId: songToReview._id,
+          songTitle: songToReview.title,
           indexToRemove: index,
         });
       };
@@ -103,10 +112,10 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
                         <Box sx={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
                             <CardContent sx={{ flex: '1 0 auto' }}>
                                 <Typography component="div" variant="h5" color="white">
-                                    {song.titulo}
+                                    {song.title}
                                 </Typography>
                                 <Typography variant="subtitle1" color="white" component="div">
-                                    {song.artista.nombre}
+                                    {song.artist.name}
                                 </Typography>
                             </CardContent>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pl: 1, pb: 1}}>
@@ -114,18 +123,18 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
                                     <IconButton aria-label="delete" onClick={() => handleDelete(song._id, index)}>
                                         <StyledDeleteIcon sx={{ color: 'white' }} />
                                     </IconButton>)}
-                                    <IconButton
+                                    {/* <IconButton
                                         aria-label="play/pause"
                                         onClick={() => handleFavoriteClick(song._id)}
                                     >
-                                        <FavoriteIcon
+                                        <StarIcon
                                             sx={{
                                                 height: 35,
                                                 width: 35,
                                                 color: isSongInHistorial(song._id) ? '#FFA130' : 'white',
                                             }}
                                         />
-                                    </IconButton>
+                                    </IconButton> */}
                                     {user.isAdmin && (
                                     <IconButton aria-label="edit">
                                         <Link to={{ pathname: `/song/${song._id}` }}>
@@ -133,14 +142,36 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
                                         </Link>
                                     </IconButton>
                                     )}
+                                    <Rating
+                                            name="hover-feedback"
+                                            value={value}
+                                            precision={0.5}
+                                            onChange={(event, newValue) => {
+                                            setValue(newValue);
+                                            }}
+                                            onChangeActive={(event, newHover) => {
+                                            setHover(newHover);
+                                            }}
+                                            onClick={() => handleReview(song._id, index)}
+                                            emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
+                                        />
+                                        <CommentIcon
+                                            sx={{
+                                                height: 25,
+                                                width: 25,
+                                                marginLeft: 2,
+                                                marginRight: 2,
+                                                color: 'grey',
+                                            }}
+                                        />
                             </Box>
                             
                         </Box>
                         <CardMedia
                             component="img"
                             sx={{ width: 160 }}
-                            image={song.album.portada}
-                            alt={`${song.titulo} album cover`}
+                            image={process.env.PUBLIC_URL + '/logo_nospeak.png'}
+                            alt={`${song.title} album cover`}
                         />
                         </StyledCard>
                     ))}

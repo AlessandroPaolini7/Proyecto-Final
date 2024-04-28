@@ -9,7 +9,7 @@ import { ErrorMessage, SuccessMessage, LoginContainer } from '../Register/styles
 
 export default function Register({client}) {
   const dispatch = useDispatch();
-  const [name, setName] = useState('');
+  const [user_name, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
@@ -36,7 +36,7 @@ export default function Register({client}) {
 
   const handleRegister = async () => {
     
-    if (!name && !email && !password && !repeatPassword) {
+    if (!user_name && !email && !password && !repeatPassword) {
       setNameError('Please enter a username');
       setEmailError('Please enter an email');
       setPasswordError('Please enter a password');
@@ -54,7 +54,7 @@ export default function Register({client}) {
       return;
     }
 
-    if (!name) {
+    if (!user_name) {
       setNameError('Please enter a username');
       return;
     }
@@ -76,12 +76,15 @@ export default function Register({client}) {
     }
 
     try {
-      const response_register = await client.post('/api/usuarios/', {
-        nombre: name,
+      const response_register = await client.post('/api/user/', {
+        name: user_name,
         email: email,
         password,
-        isArtist,
+        isAdmin: false,
+        phone_number: "1234", // agregar campo para numero de telefono
       });
+
+      
 
 
         if (response_register.status === 201) {
@@ -94,22 +97,18 @@ export default function Register({client}) {
           setRegistrationSuccess(true);
                       
 
-          const response_login = await client.post('/api/usuarios-login/', {
-            nombre: name,
+          const response_login = await client.post('/api/user-login/', {
+            name: user_name,
             password,
           });
 
-          const { token, userId, nombre } = response_login.data;
+          const { token, userId, name } = response_login.data;
           localStorage.setItem('token', token);
 
-          const response_createHistorial = await client.post('/api/historiales/', {
-            usuario: response_login.data.userId, 
-            canciones: [],
-          });
 
           dispatch(loginSuccess({
             isAuthenticated: true,
-            user: { id: userId, nombre },
+            user: { id: userId, name },
           }));
 
           setTimeout(() => {
@@ -126,7 +125,7 @@ export default function Register({client}) {
   };
 
   const handleNameChange = (e) => {
-    setName(e.target.value);
+    setUserName(e.target.value);
     setNameError('');
   };
 
@@ -156,7 +155,7 @@ export default function Register({client}) {
         <LoginInput value={email} onChange={handleEmailChange} type="email" placeholder="Email" />
         {emailError && <ErrorMessage>{emailError}</ErrorMessage>}
         <span>What should we call you?</span>
-        <LoginInput value={name} onChange={handleNameChange} type="text" placeholder="Username" />
+        <LoginInput value={user_name} onChange={handleNameChange} type="text" placeholder="Username" />
         {nameError && <ErrorMessage>{nameError}</ErrorMessage>} 
         <span>Create a password</span>
         <LoginInput value={password} onChange={handlePasswordChange} type="password" placeholder="Password" />

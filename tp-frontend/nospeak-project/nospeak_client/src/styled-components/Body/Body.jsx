@@ -9,9 +9,16 @@ import {
     AlertText,
     ButtonContainer,
   } from './styles';
-import { StyledButton, StyledButtonSecondary } from '../styles.js';
+import { StyledButton, StyledButtonSecondary, Input, Label } from '../styles.js';
 import { useSelector } from 'react-redux';
 import axios from '../../interceptors/axiosConfig.js';
+import{
+    EditAlertTitle,
+    CustomEditAlert,
+    EditAlertButtonContainer,
+    EditAlertContent,
+    EditAlertText, 
+} from '../../pages/Artist/styles.js';
 
 export default function Body({ client }) {
     const [filteredSongs, setFilteredSongs] = useState([]);
@@ -21,11 +28,12 @@ export default function Body({ client }) {
 
     const user = useSelector(state => state.user.user);
     const [userPlaylists, setUserPlaylists] = useState([]);
+    const [reviewAlertData, setReviewAlertData] = useState(null);
 
     const handleDeleteConfirm = async (alertData) => {
         try {
         
-          await client.delete(`/api/canciones/${alertData.songId}/`);
+          await client.delete(`/api/songs/${alertData.songId}/`);
     
           const updatedSongs = [...songs];
           updatedSongs.splice(alertData.indexToRemove, 1);
@@ -43,7 +51,7 @@ export default function Body({ client }) {
 
     React.useEffect(() => {
 
-        axios.get('/api/canciones/')
+        axios.get('/api/songs/')
         .then(response => {
             setSongs(response.data);
             setFilteredSongs(response.data);
@@ -65,6 +73,7 @@ export default function Body({ client }) {
                     style={{ marginBottom: -150 }}
                     setDeleteAlertData={setDeleteAlertData}
                     userPlaylists={userPlaylists}
+                    setReviewAlertData={setReviewAlertData}
                 />
             </BodyContainer>
             {deleteAlertData && (
@@ -82,6 +91,24 @@ export default function Body({ client }) {
                     </ButtonContainer>
                     </AlertContainer>
                 </Overlay>
+            )}
+            {reviewAlertData && (
+                    <CustomEditAlert>
+                        <EditAlertContent>
+                            <EditAlertTitle>{reviewAlertData?.songTitle} review</EditAlertTitle>
+                            <EditAlertText>
+                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Review description</Label>
+                                <Input
+                                    type="text"
+                                    value={""}
+                                />
+                            </EditAlertText>
+                            <EditAlertButtonContainer>
+                                <StyledButtonSecondary >Cancel</StyledButtonSecondary>
+                                <StyledButton >Save</StyledButton>
+                            </EditAlertButtonContainer>
+                        </EditAlertContent>
+                    </CustomEditAlert>
             )}
         </>
         
