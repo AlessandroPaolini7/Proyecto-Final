@@ -4,7 +4,7 @@ import { BodyContainer } from '../../styled-components/Body/styles';
 import { SpotifyBody } from '../../pages/Home/styles.js';
 import Footer from '../../styled-components/Footer/Footer';
 import {
-    PlaylistContainer,
+    CollectionContainer,
     CardContainer,
     TableContainerStyled,
     StyledH1
@@ -44,7 +44,7 @@ import {
     EditAlertText, 
 } from '../Artist/styles';
 import { Navigate } from 'react-router-dom';
-import {ImagePlaylist} from '../Song/styles'
+import {ImageCollection} from '../Song/styles'
 
 
 const columns = [
@@ -165,11 +165,11 @@ const AlbumPage = ({client}) => {
             <SpotifyBody>
                 <Sidebar />
                 <BodyContainer css={`align-items: center;`}>
-                    <PlaylistContainer>
+                    <CollectionContainer>
                     {album ? (
                         <CardContainer>
                             <CardLeftContainer>
-                                <ImagePlaylist src={album.portada}></ImagePlaylist>
+                                <ImageCollection src={album.portada}></ImageCollection>
                             </CardLeftContainer>
 
                             <CardRightContainer style={{ paddingBottom: '30px' }}>
@@ -233,7 +233,7 @@ const AlbumPage = ({client}) => {
                                 </Table>
                             </TableContainer>
                         </TableContainerStyled>
-                    </PlaylistContainer>
+                    </CollectionContainer>
                 </BodyContainer>
             </SpotifyBody>
           <Footer />

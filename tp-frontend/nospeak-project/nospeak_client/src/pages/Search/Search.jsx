@@ -2,7 +2,6 @@ import React from 'react'
 import Sidebar from '../../styled-components/Sidebar/Sidebar'
 import { BodyContainer} from '../../styled-components/Body/styles';
 import { SpotifyBody } from '../Home/styles';
-import Footer from '../../styled-components/Footer/Footer';
 import Header from '../../styled-components/Body/Header';
 import { CategoryContainer, CategoryBox, CategoryName } from './styles.js';
 
@@ -46,7 +45,6 @@ const Search = () => {
                     
                 </BodyContainer>
             </SpotifyBody>
-            <Footer/>
         </>  )
 }
 

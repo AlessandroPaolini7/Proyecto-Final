@@ -6,17 +6,12 @@ import { Navigate, useLocation } from 'react-router-dom';
 import {useSelector} from 'react-redux';
 
 
-const Header = ({ users, setFilteredUsers, songs, setFilteredSongs }) => {
+const Header = ({ users, setFilteredUsers, songs=null, setFilteredSongs=null }) => {
+    
     const [goToAccount, setGoToAccount] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const location = useLocation();
     const user = useSelector(state => state.user.user);
-    React.useEffect(() => {
-        if (location.pathname === "/library" && location.pathname !== "/search" && location.pathname !== "/recommended-users" && location.pathname !== "/following-users") {
-          setFilteredSongs(songs);
-          setFilteredUsers([]);
-        }
-      }, [setFilteredUsers, songs]);
       
     if (goToAccount) {
         return <Navigate to="/account" />;
@@ -59,9 +54,11 @@ const Header = ({ users, setFilteredUsers, songs, setFilteredSongs }) => {
             </HeaderLeft>
             <HeaderRight>
                 <Avatar />
-                <h4 style={{ color: 'white' }} onClick={() => setGoToAccount(true)}>
-                    {user.name}
-                </h4>
+                {user && (
+                    <h4 style={{ color: 'white' }} onClick={() => setGoToAccount(true)}>
+                        {user.name}
+                    </h4>
+                )}
             </HeaderRight>
         </HeaderContainer>
     );

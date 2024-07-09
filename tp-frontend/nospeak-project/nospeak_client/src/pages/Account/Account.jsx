@@ -45,7 +45,7 @@ export default function Account({client}){
         const fetchUserData = async () => {
           try {
             if(user){
-              const response = await client.get(`/api/usuarios/${user.id}`);
+              const response = await client.get(`/api/user/${user.id}`);
               if (response) {
                 setUserData(response.data);
               }
@@ -88,7 +88,7 @@ export default function Account({client}){
         try {
 
           
-          await client.delete(`/api/usuarios/${user.id}`);
+          await client.delete(`/api/user/${user.id}`);
 
           localStorage.removeItem('token');
 

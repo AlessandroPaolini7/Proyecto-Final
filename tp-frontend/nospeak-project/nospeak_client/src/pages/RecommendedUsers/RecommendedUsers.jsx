@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import Sidebar from '../../styled-components/Sidebar/Sidebar'
 import { BodyContainer} from '../../styled-components/Body/styles';
 import { SpotifyBody } from '../Home/styles';
-import Footer from '../../styled-components/Footer/Footer';
 import Header from '../../styled-components/Body/Header';
 import { Avatar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { Container, 
@@ -118,7 +117,6 @@ const otherUsers = [
   </TableContainer>
                 </BodyContainer>
             </SpotifyBody>
-            <Footer/>
         </>
     )
 }

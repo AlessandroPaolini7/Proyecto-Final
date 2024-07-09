@@ -22,7 +22,7 @@ justify-content: center;
 padding: 15px 15px 15px 15px;
 `
 
-export const ImagePlaylist = styled.img`
+export const ImageCollection = styled.img`
   width: 150px; /* Ajusta el tamaño según sea necesario */
   height: 150px;
   border-radius: 50%; /* Agrega el estilo de borde redondeado */

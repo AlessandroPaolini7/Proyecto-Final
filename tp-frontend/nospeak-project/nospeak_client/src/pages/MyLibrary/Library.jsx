@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react'
 import Sidebar from '../../styled-components/Sidebar/Sidebar'
 import { BodyContainer} from '../../styled-components/Body/styles';
 import { SpotifyBody } from '../Home/styles';
-import Footer from '../../styled-components/Footer/Footer';
 import Header from '../../styled-components/Body/Header';
-import { NavContainer, NavItem, PlaylistBox, PlaylistDescription, PlaylistGrid, PlaylistImage, PlaylistName } from './styles';
+import { NavContainer, NavItem, CollectionBox, CollectionDescription, CollectionGrid, CollectionImage, CollectionName } from './styles';
 import { ArtistBox, ArtistImage, ArtistName, TableContainerStyled,
 ComboBoxContainer, ComboBoxOption, ComboBoxOptions } from './styles';
 import { Navigate, useLocation } from 'react-router-dom';
@@ -30,7 +29,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { StyledH1 } from '../Playlist/styles';
+import { StyledH1 } from '../Collection/styles';
 
 const columns = [
     { id: 'titulo', label: 'Titulo', minWidth: 170 },
@@ -39,74 +38,74 @@ const columns = [
 
 const Library = ({client}) => {
 
-    const categories = ['Playlists', 'Artists', 'Albums', 'Made for You'];
+    const categories = ['Collections', 'Artists', 'ListenLists', 'Made for You'];
 
     const location = useLocation();
 
-    const [goToPlaylist, setGoToPlaylist] = React.useState(false);
+    const [goToCollection, setGoToCollection] = React.useState(false);
     const [activeCategory, setActiveCategory] = useState(categories[0]); 
     const [goToArtist, setGoToArtist] = React.useState(false);
 
-    const [playlistData, setPlaylistData] = useState([]);
+    const [collectionData, setCollectionData] = useState([]);
     const [artists, setArtists] = useState([]);
 
-    const [albumData, setAlbumData] = useState([]);
+    const [listenlistData, setListenListData] = useState([]);
 
     const [isComboBoxOpen, setIsComboBoxOpen] = useState(false);
 
     const [isCreateArtistAlertOpen, setIsCreateArtistAlertOpen] = useState(false);
 
-    const [isCreateAlbumAlertOpen, setIsCreateAlbumAlertOpen] = useState(false);
+    const [isCreateListenListAlertOpen, setIsCreateListenListAlertOpen] = useState(false);
 
-    const [isCreatePlaylistAlertOpen, setIsCreatePlaylistAlertOpen] = useState(false);
+    const [isCreateCollectionAlertOpen, setIsCreateCollectionAlertOpen] = useState(false);
 
     const [newArtista, setNewArtista] = useState({
-        nombre: '',
-        nacionalidad: '',
-        nro_seguidores: '',
-        portada: '',
+        name: '',
+        nationality: '',
+        followers: '',
+        cover: '',
     });
 
-    const [newAlbum, setNewAlbum] = useState({
-        titulo: '',
-        portada: '',
+    const [newListenList, setNewListenList] = useState({
+        title: '',
+        cover: '',
     });
 
     const user = useSelector(state => state.user.user);
 
-    const [newPlaylist, setNewPlaylist] = useState({
-        canciones: [],
-        titulo: '',
-        descripcion: '',
-        portada: '',
-        usuario: user.id
+    const [newCollection, setNewCollection] = useState({
+        songs: [],
+        title: '',
+        description: '',
+        cover: '',
+        user: user.id
     });
 
-    const [userHistorial, setUserHistorial] = useState(null);
+    // TODO: Fetch user reviews
 
     const [recommendedSongs, setRecommendedSongs] = useState([]);
 
     useEffect(() => {
 
-        client.get(`/api/playlists-usuario/${user.id}`)
+        client.get(`/api/collections-user/${user.id}`)
             .then(response => {
-                setPlaylistData(response.data);
+                setCollectionData(response.data);
             })
             .catch(error => {
-                console.error('Error fetching playlists:', error);
+                console.error('Error fetching collections:', error);
             });
     
 
-        client.get('/api/albums/')
+        client.get('/api/listenlists/')
             .then(response => {
-                setAlbumData(response.data);
+                setListenListData(response.data);
             })
             .catch(error => {
-                console.error('Error fetching albums:', error);
+                console.error('Error fetching listenlists:', error);
             });
     
 
-        client.get('/api/artistas/')
+        client.get('/api/artists/')
             .then(response => {
                 setArtists(response.data);
             })
@@ -115,48 +114,48 @@ const Library = ({client}) => {
             });
     }, []);
 
-    const fetchUserHistorial = () => {
-        if (user && user.id) {
-          client
-            .get(`/api/historiales-usuario/${user.id}`)
-            .then((response) => {
-              setUserHistorial(response.data);
+    // const fetchUserHistorial = () => {
+    //     if (user && user.id) {
+    //       client
+    //         .get(`/api/historiales-usuario/${user.id}`)
+    //         .then((response) => {
+    //           setUserHistorial(response.data);
   
-              const lastFiveSongs = response.data.canciones
-                .slice(-5)
-                .map((cancion) => cancion.titulo);
+    //           const lastFiveSongs = response.data.canciones
+    //             .slice(-5)
+    //             .map((cancion) => cancion.titulo);
   
-              client
-                .post('http://127.0.0.1:8000/nospeak-app/api/recomendaciones/', {
-                    song_names: lastFiveSongs,
-                })
-                .then((response) => {
-                  setRecommendedSongs(response.data.recommended_songs);
-                })
-                .catch((error) => {
-                  console.error('Error fetching recommendations:', error);
-                });
-            })
-            .catch((error) => {
-              console.error('Error fetching user historial:', error);
-            });
-        }
-      };
+    //           client
+    //             .post('http://127.0.0.1:8000/nospeak-app/api/recomendaciones/', {
+    //                 song_names: lastFiveSongs,
+    //             })
+    //             .then((response) => {
+    //               setRecommendedSongs(response.data.recommended_songs);
+    //             })
+    //             .catch((error) => {
+    //               console.error('Error fetching recommendations:', error);
+    //             });
+    //         })
+    //         .catch((error) => {
+    //           console.error('Error fetching user historial:', error);
+    //         });
+    //     }
+    //   };
       
 
   
-    useEffect(() => {
+    // useEffect(() => {
 
-        fetchUserHistorial();
-    }, [user]);
+    //     fetchUserHistorial();
+    // }, [user]);
     
 
       if (goToArtist && location.pathname !== "/artist") {
         return <Navigate to="/artist" />;
     }
 
-    if (goToPlaylist && location.pathname !== "/playlist") {
-        return <Navigate to="/playlist" />;
+    if (goToCollection && location.pathname !== "/collection") {
+        return <Navigate to="/collection" />;
     }
 
     const handleCategoryChange = (category) => {
@@ -169,21 +168,21 @@ const Library = ({client}) => {
         if (user.isAdmin) {
           setIsComboBoxOpen(!isComboBoxOpen);
         } else {
-            if(activeCategory === 'Playlists')
-                handleOptionClick('playlist');
+            if(activeCategory === 'Collections')
+                handleOptionClick('collection');
         }
       };
 
     const handleOptionClick = (option) => {
-        if(option === 'playlist'){
-            setIsCreatePlaylistAlertOpen(true)
+        if(option === 'collection'){
+            setIsCreateCollectionAlertOpen(true)
 
         }
-        if(option === 'artista'){
+        if(option === 'artist'){
             setIsCreateArtistAlertOpen(true)
         }
-        if(option === 'album'){
-            setIsCreateAlbumAlertOpen(true)
+        if(option === 'listenlist'){
+            setIsCreateListenListAlertOpen(true)
 
         }
         setIsComboBoxOpen(false);
@@ -191,18 +190,18 @@ const Library = ({client}) => {
 
     const handleCloseAlert = () => {
         setIsCreateArtistAlertOpen(false);
-        setIsCreateAlbumAlertOpen(false);
-        setIsCreatePlaylistAlertOpen(false)
+        setIsCreateListenListAlertOpen(false);
+        setIsCreateCollectionAlertOpen(false)
       };
 
       const handleSaveArtistaButtonClick = async () => {
         try {
-            await client.post(`/api/artistas/`, newArtista);
+            await client.post(`/api/artists/`, newArtista);
             setNewArtista({
-                nombre: '',
-                nacionalidad: '',
-                nro_seguidores: '',
-                portada: '',
+                name: '',
+                nationality: '',
+                followers: '',
+                cover: '',
             });
             setIsCreateArtistAlertOpen(false);
         } catch (error) {
@@ -210,32 +209,32 @@ const Library = ({client}) => {
         }
     };
 
-    const handleSaveAlbumButtonClick = async () => {
+    const handleSaveListenListButtonClick = async () => {
         try {
-            await client.post(`/api/albums/`, newAlbum);
-            setNewAlbum({
-                titulo: '',
-                portada: ''
+            await client.post(`/api/listenlists/`, newListenList);
+            setNewListenList({
+                title: '',
+                cover: ''
             });
-            setIsCreateAlbumAlertOpen(false);
+            setIsCreateListenListAlertOpen(false);
         } catch (error) {
-            console.error('Error creating album:', error);
+            console.error('Error creating listenlist:', error);
         }
     };
 
-    const handleSavePlaylistButtonClick = async () => {
+    const handleSaveCollectionButtonClick = async () => {
         try {
-            await client.post(`/api/playlists/`, newPlaylist);
-            setNewPlaylist({
-                canciones: [],
-                titulo: '',
-                descripcion: '',
-                portada: '',
-                usuario: user.id
+            await client.post(`/api/collections/`, newCollection);
+            setNewCollection({
+                songs: [],
+                title: '',
+                description: '',
+                cover: '',
+                user: user.id
             });
-            setIsCreatePlaylistAlertOpen(false);
+            setIsCreateCollectionAlertOpen(false);
         } catch (error) {
-            console.error('Error creating playlist:', error);
+            console.error('Error creating collection:', error);
         }
     };
 
@@ -260,36 +259,36 @@ const Library = ({client}) => {
                         
                         <IconContainer>
                             <StyledAddCircle   sx={{
-            color: user.isAdmin || activeCategory === 'Playlists' ? '#FFA130' : 'gray',
-            cursor: user.isAdmin || activeCategory === 'Playlists' ? 'pointer' : 'not-allowed',
+            color: user.isAdmin || activeCategory === 'Collections' ? '#FFA130' : 'gray',
+            cursor: user.isAdmin || activeCategory === 'Collections' ? 'pointer' : 'not-allowed',
         }}
          onClick={handleComboBoxButtonClick}/>
                             {isComboBoxOpen && (
                                 <ComboBoxContainer>
                                     <ComboBoxOptions>
-                                        <ComboBoxOption onClick={() => handleOptionClick('playlist')}>
-                                        Crear playlist
+                                        <ComboBoxOption onClick={() => handleOptionClick('collection')}>
+                                        Create collection
                                         </ComboBoxOption>
-                                        <ComboBoxOption onClick={() => handleOptionClick('artista')}>
-                                        Crear artista
+                                        <ComboBoxOption onClick={() => handleOptionClick('artist')}>
+                                        Create artist
                                         </ComboBoxOption>
-                                        <ComboBoxOption onClick={() => handleOptionClick('album')}>
-                                        Crear album
+                                        <ComboBoxOption onClick={() => handleOptionClick('listenlist')}>
+                                        Create Listenlist
                                         </ComboBoxOption>
                                     </ComboBoxOptions>
                                 </ComboBoxContainer>
                                 )}
                         </IconContainer>
                     </NavContainer>
-                    <PlaylistGrid>
-                        {activeCategory === 'Playlists' && (
-                            playlistData.map((playlist, index) => (
-                            <Link key={index} to={`/playlist/${playlist._id}`}>
-                                <PlaylistBox key={index}>
-                                    <PlaylistImage src={playlist.portada}></PlaylistImage>
-                                    <PlaylistName>{playlist.titulo}</PlaylistName>
-                                    <PlaylistDescription>{playlist.usuario.username}</PlaylistDescription>
-                                </PlaylistBox>
+                    <CollectionGrid>
+                        {activeCategory === 'Collections' && (
+                            collectionData.map((collection, index) => (
+                            <Link key={index} to={`/collection/${collection._id}`}>
+                                <CollectionBox key={index}>
+                                    <CollectionImage src={collection.cover}></CollectionImage>
+                                    <CollectionName>{collection.title}</CollectionName>
+                                    <CollectionDescription>{collection.user.name}</CollectionDescription>
+                                </CollectionBox>
                             </Link>
                         ))
                         )}
@@ -298,27 +297,24 @@ const Library = ({client}) => {
                             artists.map((artist, index) => (
                                 <Link key={index} to={`/artist/${artist._id}`}>
                                     <ArtistBox key={index}>
-                                        <ArtistImage src={artist.portada} alt={artist.nombre} onClick={() => {setGoToArtist(true);}} />
-                                        <ArtistName>{artist.nombre}</ArtistName>
+                                        <ArtistImage src={artist.cover} alt={artist.name} onClick={() => {setGoToArtist(true);}} />
+                                        <ArtistName>{artist.name}</ArtistName>
                                     </ArtistBox>
                                 </Link>
                             ))
                         )}
-                        {activeCategory === 'Podcasts' && (
-                            <h1> Podcasts </h1>
-                        )}
-                        {activeCategory === 'Albums' && (
-                            albumData.map((album, index) => (
-                                <Link key={index} to={`/album/${album._id}`}>
-                                    <PlaylistBox key={index}>
-                                        <PlaylistImage src={album.portada}></PlaylistImage>
-                                        <PlaylistName>{album.titulo}</PlaylistName>
-                                    </PlaylistBox>
+                        {activeCategory === 'ListenLists' && (
+                            listenlistData.map((listenlist, index) => (
+                                <Link key={index} to={`/listenlist/${listenlist._id}`}>
+                                    <CollectionBox key={index}>
+                                        <CollectionImage src={listenlist.cover}></CollectionImage>
+                                        <CollectionName>{listenlist.title}</CollectionName>
+                                    </CollectionBox>
                                 </Link>
                             ))
                         )}
                         
-                    </PlaylistGrid>
+                    </CollectionGrid>
                     {activeCategory === 'Made for You' && (
                             <TableContainerStyled>
                                 <StyledH1 style={{color: 'white', fontSize: '2em', marginLeft: '10px', marginBottom: '5px'}}>Canciones recomendadas para añadir basadas en tus favoritos</StyledH1>
@@ -351,11 +347,11 @@ const Library = ({client}) => {
                                           sx={{ backgroundColor: 'transparent', color: '#fff' }}
                                           key={column.id}
                                         >
-                                          {column.id === 'titulo' && columnIndex === 0 ? (
-                                            <span style={{ color: 'white' }}>{song.titulo}</span>
+                                          {column.id === 'title' && columnIndex === 0 ? (
+                                            <span style={{ color: 'white' }}>{song.title}</span>
                                           ) : null}
-                                          {column.id === 'artista' && columnIndex === 1 ? (
-                                            <span>{song.artista}</span>
+                                          {column.id === 'artist' && columnIndex === 1 ? (
+                                            <span>{song.artist}</span>
                                           ) : null}
                                         </TableCell>
                                       ))}
@@ -369,39 +365,38 @@ const Library = ({client}) => {
                         )}
                 </BodyContainer>
             </SpotifyBody>
-            <Footer/>
             {isCreateArtistAlertOpen && (
                 // <Overlay>
                     <CustomEditAlert>
                         <EditAlertContent>
-                            <EditAlertTitle>Crear artista</EditAlertTitle>
+                            <EditAlertTitle>Create artist</EditAlertTitle>
                             <EditAlertText>
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Nombre</Label>
+                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Name</Label>
                                 <Input
                                     type="text"
-                                    value={newArtista.nombre}
-                                    onChange={event => setNewArtista({ ...newArtista, nombre: event.target.value })}
+                                    value={newArtista.name}
+                                    onChange={event => setNewArtista({ ...newArtista, name: event.target.value })}
                                 />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Nacionalidad</Label>
+                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Nationality</Label>
                                 <Input
                                     type="text"
-                                    value={newArtista.nacionalidad}
-                                    onChange={event => setNewArtista({ ...newArtista, nacionalidad: event.target.value })}
+                                    value={newArtista.nationality}
+                                    onChange={event => setNewArtista({ ...newArtista, nationality: event.target.value })}
                                 />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Número de seguidores</Label>
+                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Followers</Label>
                                 <Input
                                     type="text"
-                                    value={newArtista.nro_seguidores}
-                                    onChange={event => setNewArtista({ ...newArtista, nro_seguidores: event.target.value })}
+                                    value={newArtista.followers}
+                                    onChange={event => setNewArtista({ ...newArtista, followers: event.target.value })}
                                 />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Portada</Label>
+                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Cover</Label>
                                 <Input
                                     type="text"
-                                    value={newArtista.portada}
-                                    onChange={event => setNewArtista({ ...newArtista, portada: event.target.value })}
+                                    value={newArtista.cover}
+                                    onChange={event => setNewArtista({ ...newArtista, cover: event.target.value })}
                                 />
                             </EditAlertText>
                             <EditAlertButtonContainer>
@@ -412,63 +407,63 @@ const Library = ({client}) => {
                     </CustomEditAlert>
 
             )}
-            {isCreateAlbumAlertOpen && (
+            {isCreateListenListAlertOpen && (
                 // <Overlay>
                     <CustomEditAlert>
                         <EditAlertContent>
-                            <EditAlertTitle>Crear album</EditAlertTitle>
+                            <EditAlertTitle>Create Listenlist</EditAlertTitle>
                             <EditAlertText>
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Título</Label>
+                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Title</Label>
                                 <Input
                                     type="text"
-                                    value={newAlbum.titulo}
-                                    onChange={event => setNewAlbum({ ...newAlbum, titulo: event.target.value })}
+                                    value={newListenList.title}
+                                    onChange={event => setNewListenList({ ...newListenList, title: event.target.value })}
                                 />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Portada</Label>
+                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Cover</Label>
                                 <Input
                                     type="text"
-                                    value={newAlbum.portada}
-                                    onChange={event => setNewAlbum({ ...newAlbum, portada: event.target.value })}
+                                    value={newListenList.cover}
+                                    onChange={event => setNewListenList({ ...newListenList, cover: event.target.value })}
                                 />
                             </EditAlertText>
                             <EditAlertButtonContainer>
                                 <StyledButtonSecondary onClick={handleCloseAlert}>Cancel</StyledButtonSecondary>
-                                <StyledButton onClick={handleSaveAlbumButtonClick}>Save</StyledButton>
+                                <StyledButton onClick={handleSaveListenListButtonClick}>Save</StyledButton>
                             </EditAlertButtonContainer>
                         </EditAlertContent>
                     </CustomEditAlert>
             )}
-            {isCreatePlaylistAlertOpen && (
+            {isCreateCollectionAlertOpen && (
                 // <Overlay>
                     <CustomEditAlert>
                         <EditAlertContent>
-                            <EditAlertTitle>Crear Playlist</EditAlertTitle>
+                            <EditAlertTitle>Create Collection</EditAlertTitle>
                             <EditAlertText>
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Título</Label>
+                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Title</Label>
                                 <Input
                                     type="text"
-                                    value={newPlaylist.titulo}
-                                    onChange={event => setNewPlaylist({ ...newPlaylist, titulo: event.target.value })}
+                                    value={newCollection.title}
+                                    onChange={event => setNewCollection({ ...newCollection, title: event.target.value })}
                                 />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Descripción</Label>
+                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Description</Label>
                                 <Input
                                     type="text"
-                                    value={newPlaylist.descripcion}
-                                    onChange={event => setNewPlaylist({ ...newPlaylist, descripcion: event.target.value })}
+                                    value={newCollection.description}
+                                    onChange={event => setNewCollection({ ...newCollection, description: event.target.value })}
                                 />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Portada</Label>
+                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Cover</Label>
                                 <Input
                                     type="text"
-                                    value={newPlaylist.portada}
-                                    onChange={event => setNewPlaylist({ ...newPlaylist, portada: event.target.value })}
+                                    value={newCollection.cover}
+                                    onChange={event => setNewCollection({ ...newCollection, cover: event.target.value })}
                                 />
                             </EditAlertText>
                             <EditAlertButtonContainer>
                                 <StyledButtonSecondary onClick={handleCloseAlert}>Cancel</StyledButtonSecondary>
-                                <StyledButton onClick={handleSavePlaylistButtonClick}>Save</StyledButton>
+                                <StyledButton onClick={handleSaveCollectionButtonClick}>Save</StyledButton>
                             </EditAlertButtonContainer>
                         </EditAlertContent>
                     </CustomEditAlert>
