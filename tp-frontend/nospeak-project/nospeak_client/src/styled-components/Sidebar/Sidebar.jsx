@@ -6,13 +6,13 @@ import SearchIcon from '@mui/icons-material/Search';
 import { Navigate, useLocation } from "react-router-dom";
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
 import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
-import GroupIcon from '@mui/icons-material/Group';
+import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import axios from '../../interceptors/axiosConfig.js';
 
 export default function Sidebar() {
-  const [playlists, setPlaylists] = useState([]);
+  const [collections, setCollections] = useState([]);
   const user = useSelector(state => state.user.user);
   const location = useLocation();
   const [goToPlaylist, setGoToPlaylist] = React.useState(false);
@@ -22,7 +22,7 @@ export default function Sidebar() {
   const [showNavbar, setShowNavbar] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [goToRecommendedUsers, setGoToRecommendedUsers] = React.useState(false);
-  const [goToFollowing, setGoToFollowing] = React.useState(false);
+  const [goToSongs, setGoToSongs] = React.useState(false);
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -43,12 +43,12 @@ export default function Sidebar() {
 
   useEffect(() => {
     if (user) {
-      axios.get(`/api/playlists-usuario/${user.id}`)
+      axios.get(`/api/collections-user/${user.id}`)
         .then(response => {
-          setPlaylists(response.data);
+          setCollections(response.data);
         })
         .catch(error => {
-          console.error('Error fetching playlists:', error);
+          console.error('Error fetching collections:', error);
         });
     }
   }, [user]);
@@ -69,8 +69,8 @@ export default function Sidebar() {
   if (goToRecommendedUsers && location.pathname !== "/recommended-users"){
     return <Navigate to="/recommended-users" />;
   }
-  if (goToFollowing && location.pathname !== "/following-users"){
-    return <Navigate to="/following-users" />;
+  if (goToSongs && location.pathname !== "/songs"){
+    return <Navigate to="/songs" />;
   }
 
   return (
@@ -83,7 +83,7 @@ export default function Sidebar() {
             <SidebarChoice  Icon={SearchIcon} onClick={() => setGoToSearch(true)} />
             <SidebarChoice  onClick={() => setGoToLibrary(true)} Icon={LibraryMusicIcon} />
             <SidebarChoice  Icon={ConnectWithoutContactIcon} onClick={() => setGoToRecommendedUsers(true)} />
-            <SidebarChoice Icon={GroupIcon} onClick={() => setGoToRecommendedUsers(true)} />
+            <SidebarChoice Icon={QueueMusicIcon} onClick={() => setGoToRecommendedUsers(true)} />
           </ChoicesContainer>
         </NavContainer>
       ) : (
@@ -93,14 +93,14 @@ export default function Sidebar() {
           <SidebarChoice title="Search" Icon={SearchIcon} onClick={() => setGoToSearch(true)} />
           <SidebarChoice title="Library" onClick={() => setGoToLibrary(true)} Icon={LibraryMusicIcon} />
           <SidebarChoice title="People like you" Icon={ConnectWithoutContactIcon} onClick={() => setGoToRecommendedUsers(true)} />
-          <SidebarChoice title="Following" Icon={GroupIcon} onClick={() => setGoToFollowing(true)} />
+          <SidebarChoice title="Songs" Icon={QueueMusicIcon} onClick={() => setGoToSongs(true)} />
           <br />
           <br />
-          <Playlists>PLAYLISTS</Playlists>
+          <Playlists>COLLECTIONS</Playlists>
           <hr />
-          {playlists.map((playlist, index) => (
-            <Link key={index} to={`/playlist/${playlist._id}`} style={{ textDecoration: 'none' }}>
-              <SidebarChoice key={playlist.id} title={playlist.titulo} />
+          {collections.map((collection, index) => (
+            <Link key={index} to={`/collection/${collection._id}`} style={{ textDecoration: 'none' }}>
+              <SidebarChoice key={collection.id} title={collection.title} />
             </Link>
           ))}
         </SidebarContainer>

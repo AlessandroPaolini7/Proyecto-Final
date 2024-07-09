@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const PlaylistBox = styled.div`
+export const CollectionBox = styled.div`
   background-color: rgba(0, 0, 0, 0.3);
   padding: 15px;
   margin: 10px;
@@ -17,17 +17,17 @@ export const PlaylistBox = styled.div`
   }
 `;
 
-export const PlaylistName = styled.h3`
+export const CollectionName = styled.h3`
   margin: 10px 0 5px;
   color: #fff; /* Text color */
 `;
 
-export const PlaylistDescription = styled.p`
+export const CollectionDescription = styled.p`
   color: #ddd; /* Text color */
   margin: 0;
 `;
 
-export const PlaylistImage = styled.img`
+export const CollectionImage = styled.img`
   max-width: 100%;
   height: 200px;
   width: 200px;
@@ -35,7 +35,7 @@ export const PlaylistImage = styled.img`
   border-radius: 4px;
 `;
 
-export const PlaylistGrid = styled.div`
+export const CollectionGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
@@ -74,7 +74,7 @@ export const NavItem = styled.div`
   }
 `;
 
-export const ArtistGrid = styled(PlaylistGrid)`
+export const ArtistGrid = styled(CollectionGrid)`
   grid-template-columns: repeat(
     auto-fill,
     minmax(150px, 1fr)

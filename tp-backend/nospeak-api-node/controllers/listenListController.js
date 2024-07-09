@@ -2,7 +2,10 @@ const ListenList = require('../models/listenList');
 
 exports.getListenLists = async (req, res) => {
   try {
-    const listenLists = await ListenList.find().populate('songs user');
+    const listenLists = await ListenList.find().populate({
+      path: 'songs',
+      populate: { path: 'artist' }
+    }).populate('user');
     res.status(200).json(listenLists);
   } catch (error) {
     res.status(500).json({ message: 'Internal server error' });
@@ -32,7 +35,10 @@ exports.createListenList = async (req, res) => {
 exports.getListenListById = async (req, res) => {
   try {
     const listenListId = req.params.id;
-    const listenList = await ListenList.findById(listenListId).populate('songs user');
+    const listenList = await ListenList.findById(listenListId).populate({
+      path: 'songs',
+      populate: { path: 'artist' }
+    }).populate('user');
 
     if (!listenList) {
       return res.status(404).json({ message: 'Listen list not found' });
@@ -83,7 +89,10 @@ exports.deleteListenList = async (req, res) => {
 exports.getListenListsByUser = async (req, res) => {
   try {
     const userId = req.params.user_id;
-    const listenLists = await ListenList.find({ user: userId }).populate('songs user');
+    const listenLists = await ListenList.find({ user: userId }).populate({
+      path: 'songs',
+      populate: { path: 'artist' }
+    }).populate('user');
 
     res.status(200).json(listenLists);
   } catch (error) {

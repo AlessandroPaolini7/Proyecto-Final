@@ -3,12 +3,12 @@ import Sidebar from '../../styled-components/Sidebar/Sidebar'
 import { BodyContainer } from '../../styled-components/Body/styles';
 import { SpotifyBody } from '../../pages/Home/styles.js'
 import { 
-    PlaylistContainer, 
+    CollectionContainer, 
     CardContainer, 
     TableContainerStyled,
     CardLeftContainer,
     CardRightContainer, 
-    ImagePlaylist, 
+    ImageCollection, 
     StyledH1,
     FormContainer, 
     ColumnForm, 
@@ -156,12 +156,12 @@ export default function Song({client}) {
             <SpotifyBody>
                 <Sidebar/>
                 <BodyContainer css={`align-items: center;`}>
-                    <PlaylistContainer>
+                    <CollectionContainer>
                         <CardContainer song={song}>
                             {song && (
                                 <>
                                     <CardLeftContainer>
-                                        <ImagePlaylist src={song.album.portada}></ImagePlaylist>
+                                        <ImageCollection src={song.album.portada}></ImageCollection>
                                     </CardLeftContainer>
                                     <CardRightContainer>
                                         <StyledH1>{song.titulo}</StyledH1>
@@ -227,7 +227,7 @@ export default function Song({client}) {
                                 </ButtonContainer>
                             </FormContainer>
                         </TableContainerStyled>
-                    </PlaylistContainer>
+                    </CollectionContainer>
                 </BodyContainer>
             </SpotifyBody>
             {/* <Footer/> */}

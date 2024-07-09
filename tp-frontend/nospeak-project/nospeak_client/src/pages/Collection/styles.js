@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-const PlaylistContainer = styled.div`
+const CollectionContainer = styled.div`
 display: flex;
 flex-direction: column;
 height: 100%;
@@ -47,7 +47,7 @@ color: #fff;
 padding-bottom: 15px;
 `
 
-const ImagePlaylist = styled.img`
+const ImageCollection = styled.img`
 block-size: 80%;
 inline-size: 80%;
 margin: auto;
@@ -88,5 +88,5 @@ const UsuarioContainer = styled.div`
     }
 `
 
-export {PlaylistContainer, CardContainer, TableContainerStyled, CardLeftContainer, 
-CardRightContainer, ImagePlaylist, StyledH1, TableSongs, UsuarioContainer}
+export {CollectionContainer, CardContainer, TableContainerStyled, CardLeftContainer, 
+CardRightContainer, ImageCollection, StyledH1, TableSongs, UsuarioContainer}
