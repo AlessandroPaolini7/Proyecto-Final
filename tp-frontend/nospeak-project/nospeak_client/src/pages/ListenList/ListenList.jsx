@@ -402,7 +402,6 @@ const ListenList = ({client}) => {
                                 />
 
                                 <Label style={{marginBottom: '0px', marginTop: '10px'}}>Cover</Label>
-                                <EditAlertButtonContainer style={{marginTop: '0px'}} >
                                     <Button
                                             component="label"
                                             role={undefined}
@@ -412,8 +411,7 @@ const ListenList = ({client}) => {
                                             >
                                             Upload file
                                             <VisuallyHiddenInput type="file" />
-                                        </Button>
-                                </EditAlertButtonContainer>
+                                    </Button>
                             </EditAlertText>
                             <EditAlertButtonContainer style={{marginBottom: '0px'}}>
                                 <StyledButtonSecondary style={{marginBottom: '0px'}} onClick={handleCloseAlert}>Cancel</StyledButtonSecondary>
