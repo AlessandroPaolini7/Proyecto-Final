@@ -1,4 +1,5 @@
 const Review = require('../models/review');
+const FollowRelation = require('../models/followRelation');
 
 
 exports.getReviews = async (req, res) => {
@@ -89,13 +90,27 @@ exports.getReviewByUsuario = async (req, res) => {
   try {
     const userId = req.params.user_id;
 
-    const review = await Review.findOne({ user: userId }).populate('song');
+    const reviews = await Review.find({ user: userId }).populate({
+      path: 'song',
+      populate: { path: 'artist' }
+    }).populate('user');
 
-    if (!review) {
-      return res.status(404).json({ message: 'Review not found' });
-    }
+    const followersCount = await FollowRelation.countDocuments({ following: userId });
+    const reviewsCount = await Review.countDocuments({ user: userId });
 
-    res.status(200).json(review);
+    const enrichedReviews = await Promise.all(reviews.map(async (review) => {
+   
+      return {
+        ...review.toObject(),
+        user: {
+          ...review.user.toObject(),
+          followersCount: followersCount,
+          reviewsCount: reviewsCount
+        }
+      };
+    }));
+
+    res.status(200).json(enrichedReviews);
   } catch (error) {
     res.status(500).json({ message: 'Internal server error' });
   }

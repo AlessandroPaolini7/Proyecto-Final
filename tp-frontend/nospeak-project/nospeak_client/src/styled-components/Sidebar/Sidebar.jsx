@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SidebarContainer, Playlists, NavContainer, NavBrand,ChoicesContainer } from './styles.js';
+import { SidebarContainer, Playlists, NavContainer, NavBrand, ChoicesContainer } from './styles.js';
 import SidebarChoice from './SidebarChoice.jsx';
 import HomeIcon from '@mui/icons-material/Home';
 import SearchIcon from '@mui/icons-material/Search';
@@ -15,14 +15,15 @@ export default function Sidebar() {
   const [collections, setCollections] = useState([]);
   const user = useSelector(state => state.user.user);
   const location = useLocation();
-  const [goToPlaylist, setGoToPlaylist] = React.useState(false);
-  const [goToSearch, setGoToSearch] = React.useState(false);
-  const [goToHome, setGoToHome] = React.useState(false);
-  const [goToLibrary, setGoToLibrary] = React.useState(false);
+  const [goToPlaylist, setGoToPlaylist] = useState(false);
+  const [goToSearch, setGoToSearch] = useState(false);
+  const [goToHome, setGoToHome] = useState(false);
+  const [goToLibrary, setGoToLibrary] = useState(false);
   const [showNavbar, setShowNavbar] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [goToRecommendedUsers, setGoToRecommendedUsers] = React.useState(false);
-  const [goToSongs, setGoToSongs] = React.useState(false);
+  const [goToRecommendedUsers, setGoToRecommendedUsers] = useState(false);
+  const [goToSongs, setGoToSongs] = useState(false);
+
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -40,7 +41,6 @@ export default function Sidebar() {
     }
   }, [windowWidth]);
 
-
   useEffect(() => {
     if (user) {
       axios.get(`/api/collections-user/${user.id}`)
@@ -53,23 +53,22 @@ export default function Sidebar() {
     }
   }, [user]);
 
-
-  if (goToPlaylist && location.pathname !== "/playlist") {
+  if (goToPlaylist && location.pathname !== '/playlist') {
     return <Navigate to="/playlist" />;
   }
-  if (goToSearch && location.pathname !== "/search") {
+  if (goToSearch && location.pathname !== '/search') {
     return <Navigate to="/search" />;
   }
-  if (goToHome && location.pathname !== "/home"){
+  if (goToHome && location.pathname !== '/home') {
     return <Navigate to="/home" />;
   }
-  if (goToLibrary && location.pathname !== "/library"){
+  if (goToLibrary && location.pathname !== '/library') {
     return <Navigate to="/library" />;
   }
-  if (goToRecommendedUsers && location.pathname !== "/recommended-users"){
+  if (goToRecommendedUsers && location.pathname !== '/recommended-users') {
     return <Navigate to="/recommended-users" />;
   }
-  if (goToSongs && location.pathname !== "/songs"){
+  if (goToSongs && location.pathname !== '/songs') {
     return <Navigate to="/songs" />;
   }
 
@@ -77,23 +76,25 @@ export default function Sidebar() {
     <>
       {showNavbar ? (
         <NavContainer>
-          <NavBrand><img src={process.env.PUBLIC_URL + '/logo_nospeak.png'} alt="logo" style={{ width: '160px', height: '70px', marginLeft: '55px' }}/></NavBrand>
+          <NavBrand>
+            <img src={process.env.PUBLIC_URL + '/logo_nospeak.png'} alt="logo" style={{ width: '160px', height: '70px', marginLeft: '55px' }} />
+          </NavBrand>
           <ChoicesContainer>
-            <SidebarChoice  Icon={HomeIcon} onClick={() => setGoToHome(true)} />
-            <SidebarChoice  Icon={SearchIcon} onClick={() => setGoToSearch(true)} />
-            <SidebarChoice  onClick={() => setGoToLibrary(true)} Icon={LibraryMusicIcon} />
-            <SidebarChoice  Icon={ConnectWithoutContactIcon} onClick={() => setGoToRecommendedUsers(true)} />
-            <SidebarChoice Icon={QueueMusicIcon} onClick={() => setGoToRecommendedUsers(true)} />
+            <SidebarChoice Icon={HomeIcon} onClick={() => setGoToHome(true)} isActive={location.pathname === '/home'} />
+            <SidebarChoice Icon={SearchIcon} onClick={() => setGoToSearch(true)} isActive={location.pathname === '/search'} />
+            <SidebarChoice onClick={() => setGoToLibrary(true)} Icon={LibraryMusicIcon} isActive={location.pathname === '/library'} />
+            <SidebarChoice Icon={ConnectWithoutContactIcon} onClick={() => setGoToRecommendedUsers(true)} isActive={location.pathname === '/recommended-users'} />
+            <SidebarChoice Icon={QueueMusicIcon} onClick={() => setGoToSongs(true)} isActive={location.pathname === '/songs'} />
           </ChoicesContainer>
         </NavContainer>
       ) : (
         <SidebarContainer>
-          <img src={process.env.PUBLIC_URL + '/logo_nospeak.png'} alt="logo" style={{ width: '160px', height: '70px', marginLeft: '55px' }}/>
-          <SidebarChoice title="Home" Icon={HomeIcon} onClick={() => setGoToHome(true)} />
-          <SidebarChoice title="Search" Icon={SearchIcon} onClick={() => setGoToSearch(true)} />
-          <SidebarChoice title="Library" onClick={() => setGoToLibrary(true)} Icon={LibraryMusicIcon} />
-          <SidebarChoice title="People like you" Icon={ConnectWithoutContactIcon} onClick={() => setGoToRecommendedUsers(true)} />
-          <SidebarChoice title="Songs" Icon={QueueMusicIcon} onClick={() => setGoToSongs(true)} />
+          <img src={process.env.PUBLIC_URL + '/logo_nospeak.png'} alt="logo" style={{ width: '160px', height: '70px', marginLeft: '55px' }} />
+          <SidebarChoice title="Home" Icon={HomeIcon} onClick={() => setGoToHome(true)} isActive={location.pathname === '/home'} />
+          <SidebarChoice title="Search" Icon={SearchIcon} onClick={() => setGoToSearch(true)} isActive={location.pathname === '/search'} />
+          <SidebarChoice title="Library" onClick={() => setGoToLibrary(true)} Icon={LibraryMusicIcon} isActive={location.pathname === '/library'} />
+          <SidebarChoice title="People like you" Icon={ConnectWithoutContactIcon} onClick={() => setGoToRecommendedUsers(true)} isActive={location.pathname === '/recommended-users'} />
+          <SidebarChoice title="Songs" Icon={QueueMusicIcon} onClick={() => setGoToSongs(true)} isActive={location.pathname === '/songs'} />
           <br />
           <br />
           <Playlists>COLLECTIONS</Playlists>
@@ -107,4 +108,4 @@ export default function Sidebar() {
       )}
     </>
   );
-}  
+}

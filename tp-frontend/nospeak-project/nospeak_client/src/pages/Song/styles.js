@@ -7,7 +7,7 @@ height: 100%;
 width: 100%;
 border-radius: 5px;
 overflow: hidden;
-background-image: linear-gradient(to bottom, #FFA130, #000);
+background-image: linear-gradient(to bottom, #faa130, #000);
 font-family: var(--font-family,CircularSp,CircularSp-Arab,CircularSp-Hebr,CircularSp-Cyrl,CircularSp-Grek,CircularSp-Deva,var(--fallback-fonts,sans-serif));
 `
 
