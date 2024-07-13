@@ -50,7 +50,7 @@ const Username = styled.span`
 
 const Stats = styled.span`
   font-size: 14px;
-  color: #999;
+  color: white;
 `;
 
 const StyledTableCell = styled(TableCell)`

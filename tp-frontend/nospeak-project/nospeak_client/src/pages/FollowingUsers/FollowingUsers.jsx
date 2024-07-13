@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import Sidebar from '../../styled-components/Sidebar/Sidebar'
-import { BodyContainer} from '../../styled-components/Body/styles';
+import React, { useState, useEffect } from 'react';
+import Sidebar from '../../styled-components/Sidebar/Sidebar';
+import { BodyContainer } from '../../styled-components/Body/styles';
 import { SpotifyBody } from '../Home/styles';
 import Header from '../../styled-components/Body/Header';
 import { Avatar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
@@ -18,107 +18,202 @@ import { Container,
     Reviews,
     FollowButton,
     FollowButtonText } from './styles';
+import { useSelector } from 'react-redux';
+import {
+    CollectionContainer,
+    CardContainer,
+    TableContainerStyled,
+    StyledH1
+} from '../Song/styles';
+import {
+    CardRightContainer,
+    ImageCollection,
+    CardLeftContainer,
+} from '../User/styles';
+import { StyledButton, StyledButtonSecondary, Input, Label } from '../../styled-components/styles.js';
+import { Link } from 'react-router-dom';
+import CircularIndeterminate from '../../styled-components/Extras/CircularIndeterminate.jsx'; // Importa tu componente de carga
+import PersonAddDisabledIcon from '@mui/icons-material/PersonAddDisabled';
+import { 
+    Overlay,
+    AlertContainer,
+    AlertTitle,
+    AlertText,
+    ButtonContainer,
+} from '../../styled-components/Body/styles';
 
+const columns = [
+    { id: 'username', label: 'Username', minWidth: 170 },
+    { id: 'followers', label: 'Followers', minWidth: 100, align: 'center' },
+    { id: 'reviews', label: 'Reviews', minWidth: 100, align: 'center' },
+    { id: 'actions', label: '', minWidth: 100, align: 'center' },
+];
 
+const FollowingUsers = ({ client }) => {
+    const user = useSelector(state => state.user.user);
+    const [usersToShow, setUsersToShow] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [deleteAlertData, setDeleteAlertData] = useState(null);
+    const [goToUser, setGoToUser] = useState(false);
 
-const FollowingUsers = ({client}) => {
+    useEffect(() => {
+        const fetchFollowingUsers = async () => {
+            try {
+                user.id = "662ed1466df11d2edff1d8a5";
+                const response = await client.get(`/api/user/following/${user.id}`);
+                setUsersToShow(response.data.reverse());
+                console.log('Following users:', response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching following users:', error);
+                setLoading(false);
+            }
+        };
 
-    const staticUsers = [
-        { name: 'James', songs: 1000, reviews: 884 },
-        { name: 'Mario Pergolini', songs: 1400, reviews: 1600 },
-        { name: 'Zoë Rose Bryant', songs: 4800, reviews: 2300 },
-        { name: 'Ricardo Darín', songs: 2600, reviews: 1800 },
-        { name: 'Samid', songs: 2700, reviews: 185 },
-      ];
-    
-    const otherUsers = [
-        { name: 'Rober galati', reviews: 1088, follows: 1544, lists: 47, likes: 1854 },
-        { name: 'el turco garcia', reviews: 616, follows: 2096, lists: 1, likes: 240232 },
-        { name: 'gbeder', reviews: 1215, follows: 2853, lists: 196, likes: 13076 },
-        { name: 'luquitarod', reviews: 1215, follows: 2853, lists: 196, likes: 13076 },
-        { name: 'ALFA', reviews: 1215, follows: 2853, lists: 196, likes: 13076 },
-    
-      ];
-      const [usersToShow, setUsersToShow] = useState(otherUsers);
+        fetchFollowingUsers();
+    }, [client, user.id]);
 
-      const handleFollowToggle = (index) => {
-        setUsersToShow((prevUsers) =>
-            prevUsers.map((user, i) =>
-                i === index ? { ...user, isFollowing: !user.isFollowing } : user
-            )
-        );
+    const handleUnfollow = async (followingId) => {
+        try {
+            await client.delete('/api/followrelation/', {
+                data: {
+                    followerId: user.id,
+                    followingId: followingId,
+                },
+            });
+            setUsersToShow((prevUsers) =>
+                prevUsers.filter((user) => user._id !== followingId)
+            );
+        } catch (error) {
+            console.error('Error unfollowing user:', error);
+        }
     };
-      
+
+    const handleUnfollowClick = (userId) => {
+        setDeleteAlertData({
+            followingId: userId,
+        });
+    };
+
+    const handleDeleteConfirm = async () => {
+        await handleUnfollow(deleteAlertData.followingId);
+        setDeleteAlertData(null);
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteAlertData(null);
+    };
+
+    if (loading) {
+        return <CircularIndeterminate />;
+    }
+
     return (
         <>
             <SpotifyBody>
-                    <Sidebar client={client}/>
-                    <BodyContainer css={`align-items: center;`}>
-                        <Header users={otherUsers} setFilteredUsers={setUsersToShow}/>
-                        <Container>
-                            <HeaderRU>
-                                <HeaderText >Friends, critics you like and good people — members you care about.</HeaderText>
-                            </HeaderRU>
-                            <div style={{marginBottom:'15px'}}>
-                                <PopularText >LAST PEOPLE FOLLOWED  </PopularText>
+                <Sidebar client={client} />
+                <BodyContainer css={`align-items: center;`}>
+                    <CollectionContainer>
+                    <div style={{paddingLeft: '10px'}}>
+                        <Header users={usersToShow} setFilteredUsers={setUsersToShow}/>
+                        <CardContainer style={{flexDirection: 'column', padding: '10px', paddingLeft: '10px', marginBottom: '10px'}}>
+                        <StyledH1 style={{ marginTop: '0px', marginBottom: '0px', fontSize: '2em', color: 'white' }}>Friends, critics you like and good people — members you care about.</StyledH1>
+                            <div style={{ marginBottom: '15px', marginTop: '10px' }}>
+                                <PopularText style={{color: 'white'}} >LAST PEOPLE FOLLOWED</PopularText>
                             </div>
                             <div style={{ display: 'flex' }}>
-                                {staticUsers.map((user) => (
-                                    <UserContainer key={user.name}>
-                                    <Avatar sx={{height:'100px', width:'100px'}} src={`https://i.pravatar.cc/150?u=${user.name}`} />
-                                    <UserInfo>
-                                        <Username>{user.name}</Username>
-                                        <Stats>
-                                        {user.songs} songs 
-                                        <br />
-                                        {user.reviews} reviews
-                                        </Stats>
-                                    </UserInfo>
-                                    </UserContainer>
+                                {usersToShow.slice(0, 5).map((user) => (
+                                    <Link key={user._id} to={`/user/${user._id}`} style={{textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', marginRight: '30px'}}>
+                                        <UserContainer key={user._id}>
+                                            <Avatar sx={{ height: '100px', width: '100px' }} src={`https://i.pravatar.cc/150?u=${user.name}`} />
+                                            <UserInfo>
+                                                <Username>{user.name}</Username>
+                                                <Stats>
+                                                    {user.followersCount} followers
+                                                    <br />
+                                                    {user.reviewsCount} reviews
+                                                </Stats>
+                                            </UserInfo>
+                                        </UserContainer>
+                                    </Link>
                                 ))}
-                                </div>
-                            </Container>
-                <TableContainer>
-                    <Table aria-label="popular members table">
-                    <TableHead>
-                        <TableRow>
-                        <StyledTableCell></StyledTableCell>
-                        <StyledTableCell></StyledTableCell>
-                        <StyledTableCell sx={{color:'white'}} align="right">Followers</StyledTableCell>
-                        <StyledTableCell sx={{color:'white'}} align="right">Lists</StyledTableCell>
-                        <StyledTableCell sx={{color:'white'}} align="right"></StyledTableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {usersToShow.map((user, index) => (
-                        <StyledTableRow key={user.name}>
-                            <StyledTableCell>
-                            <AvatarContainer>
-                                <Avatar src={`https://i.pravatar.cc/150?u=${user.name}`} />
-                                <UserInfo>
-                                <Username>{user.name}</Username>
-                                <Reviews>{user.reviews} reviews</Reviews>
-                                </UserInfo>
-                            </AvatarContainer>
-                            </StyledTableCell>
-                            <StyledTableCell></StyledTableCell>
-                            <StyledTableCell sx={{color:'white'}} align="right">{user.follows}</StyledTableCell>
-                            <StyledTableCell sx={{color:'white'}} align="right">{user.lists}</StyledTableCell>
-                            <StyledTableCell align="right"> 
-                            <FollowButton variant="contained" onClick={() => handleFollowToggle(index)}>
-                                 <FollowButtonText>{user.isFollowing ? 'Follow' : 'Following'}</FollowButtonText>
-                            </FollowButton>
-                            </StyledTableCell>
-                        </StyledTableRow>
-                        ))}
-                    </TableBody>
-                    </Table>
-                </TableContainer>
-                    </BodyContainer>
-        </SpotifyBody>
+                            </div>
+                        </CardContainer>
+                    </div>
+                        <TableContainerStyled>
+                            <TableContainer sx={{ maxHeight: 440 }} style={{width: '96%'}}>
+                                <Table sx={{ margin: 0, padding: '10px' }}>
+                                    <TableHead>
+                                        <TableRow>
+                                            {columns.map((column) => (
+                                                <TableCell
+                                                    key={column.id}
+                                                    align={column.align}
+                                                    style={{ minWidth: column.minWidth, backgroundColor: 'transparent', color: '#fff', fontWeight: 'bold' }}
+                                                >
+                                                    {column.label}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody >
+                                        {usersToShow.map((user, index) => (
+                                            <TableRow hover role="checkbox" tabIndex={-1} key={user._id} >
+                                                {columns.map((column) => (
+                                                    <TableCell
+                                                        key={column.id}
+                                                        align={column.align}
+                                                        sx={{ backgroundColor: 'transparent', color: '#fff'}}
+                                                    >
+                                                        {column.id === 'username' ? (
+                                                            <Link key={index} to={`/user/${user._id}`} style={{ width: 100, textDecoration: 'none', color: 'inherit' }}>
+                                                                <AvatarContainer>
+                                                                    <Avatar src={`https://i.pravatar.cc/150?u=${user.name}`} />
+                                                                    <UserInfo>
+                                                                        <Username>{user.name}</Username>
+                                                                        <Reviews>{user.collectionCount} collections</Reviews>
+                                                                    </UserInfo>
+                                                                </AvatarContainer>
+                                                            </Link>
+                                                        ) : null}
+                                                        {column.id === 'followers' ? (
+                                                            <span>{user.followersCount}</span>
+                                                        ) : null}
+                                                        {column.id === 'reviews' ? (
+                                                            <span>{user.reviewsCount}</span>
+                                                        ) : null}
+                                                        {column.id === 'actions' ? (
+                                                            <PersonAddDisabledIcon style={{ color: 'white', cursor: 'pointer' }} onClick={() => handleUnfollowClick(user._id)} />
+                                                        ) : null}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </TableContainerStyled>
+                    </CollectionContainer>
+                </BodyContainer>
+            </SpotifyBody>
+            {deleteAlertData && (
+                <Overlay>
+                    <AlertContainer>
+                        <AlertTitle>Unfollow user</AlertTitle>
+                        <AlertText>
+                            Are you sure you want to unfollow this user?
+                        </AlertText>
+                        <ButtonContainer style={{marginBottom: '0px', paddingBottom: '0px'}}>
+                            <StyledButtonSecondary style={{ width: '50%', marginRight: '5px' , paddingBottom: '0px', marginBottom: '0px'}} onClick={handleDeleteCancel}>Cancel</StyledButtonSecondary>
+                            <StyledButton style={{ backgroundColor: '#FF5630', width: '50%', marginLeft: '5px', paddingBottom: '0px', marginBottom: '0px'}} onClick={handleDeleteConfirm}>
+                                Unfollow
+                            </StyledButton>
+                        </ButtonContainer>
+                    </AlertContainer>
+                </Overlay>
+            )}
         </>
+    );
+};
 
-    )
-}
-
-export default FollowingUsers
+export default FollowingUsers;

@@ -21,6 +21,8 @@ import {
   StyledButtonSecondary,
 } from '../../styled-components/styles';
 
+import CircularIndeterminate from '../../styled-components/Extras/CircularIndeterminate.jsx'; // Importa tu componente de carga
+
 export default function Account({client}){
 
     const user = useSelector(state => state.user.user);
@@ -34,6 +36,8 @@ export default function Account({client}){
     const [userData, setUserData] = React.useState(null);
 
     const [deleteAlertData, setDeleteAlertData] = React.useState(null);
+
+    const [loading, setLoading] = React.useState(true);
     
 
     useEffect(() => {
@@ -48,6 +52,7 @@ export default function Account({client}){
               const response = await client.get(`/api/user/${user.id}`);
               if (response) {
                 setUserData(response.data);
+                setLoading(false);
               }
             }
           } catch (error) {
@@ -63,6 +68,9 @@ export default function Account({client}){
       return <Navigate to="/login" />;
     }
 
+    if (loading) {
+      return <CircularIndeterminate />;
+  }
 
     const handleLogout = async () => {
       try{
@@ -105,9 +113,6 @@ export default function Account({client}){
         setDeleteAlertData(null);
       };
 
-      if (!userData) {
-        return <div>Cargando datos del usuario...</div>;
-      }
 
     return (
         <>

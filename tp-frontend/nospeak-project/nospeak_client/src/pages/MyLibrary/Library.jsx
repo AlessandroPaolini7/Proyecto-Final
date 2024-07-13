@@ -31,6 +31,10 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { StyledH1 } from '../Collection/styles';
 
+import CircularIndeterminate from '../../styled-components/Extras/CircularIndeterminate.jsx'; // Importa tu componente de carga
+
+
+
 const columns = [
     { id: 'titulo', label: 'Titulo', minWidth: 170 },
     { id: 'artista', label: 'Artista', minWidth: 170 }
@@ -84,35 +88,48 @@ const Library = ({client}) => {
     // TODO: Fetch user reviews
 
     const [recommendedSongs, setRecommendedSongs] = useState([]);
+    const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
 
         client.get(`/api/collections-user/${user.id}`)
             .then(response => {
                 setCollectionData(response.data);
+                setLoading(false);
             })
             .catch(error => {
                 console.error('Error fetching collections:', error);
+                setLoading(false);
             });
     
 
         client.get('/api/listenlists/')
             .then(response => {
                 setListenListData(response.data);
+                setLoading(false);
             })
             .catch(error => {
                 console.error('Error fetching listenlists:', error);
+                setLoading(false);
             });
     
 
         client.get('/api/artists/')
             .then(response => {
                 setArtists(response.data);
+                setLoading(false);
             })
             .catch(error => {
                 console.error('Error fetching artists:', error);
+                setLoading(false);
             });
     }, []);
+    
+    if (loading) {
+        return <CircularIndeterminate />;
+    }
+
 
     // const fetchUserHistorial = () => {
     //     if (user && user.id) {
@@ -297,8 +314,8 @@ const Library = ({client}) => {
                             artists.map((artist, index) => (
                                 <Link key={index} to={`/artist/${artist._id}`}>
                                     <ArtistBox key={index}>
-                                        <ArtistImage src={artist.cover} alt={artist.name} onClick={() => {setGoToArtist(true);}} />
-                                        <ArtistName>{artist.name}</ArtistName>
+                                        <ArtistImage src={`https://i.pravatar.cc/150?u=${artist.name}`} alt={artist.name} onClick={() => {setGoToArtist(true);}} />
+                                        <ArtistName>{artist.name}</ArtistName>  
                                     </ArtistBox>
                                 </Link>
                             ))
@@ -307,7 +324,7 @@ const Library = ({client}) => {
                             listenlistData.map((listenlist, index) => (
                                 <Link key={index} to={`/listenlist/${listenlist._id}`}>
                                     <CollectionBox key={index}>
-                                        <CollectionImage src={listenlist.cover}></CollectionImage>
+                                        <CollectionImage src={`https://picsum.photos/300/300`}></CollectionImage>
                                         <CollectionName>{listenlist.title}</CollectionName>
                                     </CollectionBox>
                                 </Link>

@@ -1,7 +1,11 @@
 const User = require('../models/user');
+const FollowRelation = require('../models/followRelation');
+const Review = require('../models/review');
+const Collection = require('../models/collection');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
+
 
 exports.getUsers = async (req, res) => {
   try {
@@ -21,11 +25,23 @@ exports.getUserById = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.status(200).json(user);
+    const followersCount = await FollowRelation.countDocuments({ following: user._id });
+    const reviewsCount = await Review.countDocuments({ user: user._id });
+    const collectionCount = await Collection.countDocuments({ user: user._id });
+
+    const userWithStats = {
+      ...user.toObject(),
+      followersCount,
+      reviewsCount,
+      collectionCount
+    };
+
+    return res.status(200).json(userWithStats);
   } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 exports.updateUser = async (req, res) => {
   try {
@@ -130,4 +146,49 @@ exports.loginUser = async (req, res) =>{
     res.status(500).json({ message: 'Internal server error' });
   }
 
+};
+
+
+// Obtener cantidad de seguidores, reseñas y colecciones de un usuario
+exports.getUserStats = async (userId) => {
+  const followersCount = await FollowRelation.countDocuments({ following: userId });
+  const reviewsCount = await Review.countDocuments({ user: userId });
+  const collectionCount = await Collection.countDocuments({ user: userId });
+
+  return { followersCount, reviewsCount, collectionCount };
+};
+
+
+// Obtener seguidores de un usuario
+exports.getUserFollowers = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const followers = await FollowRelation.find({ following: userId })
+      .populate('follower');
+
+    res.status(200).json(followers);
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Obtener usuarios que sigue un usuario con estadísticas adicionales
+exports.getUserFollowing = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const followingRelations = await FollowRelation.find({ follower: userId })
+      .populate('following');
+
+    const followingWithStats = await Promise.all(followingRelations.map(async (relation) => {
+      const followingUser = relation.following;
+      const stats = await exports.getUserStats(followingUser._id);
+      return { ...followingUser.toObject(), ...stats };
+    }));
+
+    res.status(200).json(followingWithStats);
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
 };

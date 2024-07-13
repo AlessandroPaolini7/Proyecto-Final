@@ -13,6 +13,8 @@ const reviewRoutes = require('./reviewRoutes');
 const reviewUserRoutes = require('./reviewUserRoutes');
 const listenListRoutes = require('./listenListRoutes');
 const listenListUserRoutes = require('./listenListUserRoutes');
+const followRelationRoutes = require('./followRelationRoutes');
+const followRelationUserRoutes = require('./followRelationUserRoutes');
 
 
 router.use('/user', userRoutes);
@@ -27,5 +29,9 @@ router.use('/reviews', reviewRoutes);
 router.use('/reviews-user', reviewUserRoutes);
 router.use('/listenlists', listenListRoutes);
 router.use('/listenlists-user', listenListUserRoutes);
+router.use('/listenlists-user', listenListUserRoutes);
+router.use('/followrelation', followRelationRoutes);
+router.use('/followrelation-user', followRelationUserRoutes);
+
 
 module.exports = router;

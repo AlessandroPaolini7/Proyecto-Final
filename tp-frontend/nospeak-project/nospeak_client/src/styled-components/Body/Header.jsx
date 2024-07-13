@@ -57,7 +57,7 @@ const Header = ({ users, setFilteredUsers, songs=null, setFilteredSongs=null }) 
         />
       </HeaderLeft>
       <HeaderRight>
-        <Avatar />
+        <Avatar src={`https://i.pravatar.cc/150?u=${user.name}`} />
         {user && (
           <h4 style={{ color: 'white' }} onClick={() => setGoToAccount(true)}>
             {user.name}

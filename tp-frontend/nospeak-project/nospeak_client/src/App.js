@@ -52,7 +52,7 @@ function App() {
             <Route path="/home" element={<FollowingUsers  client={axios} />} />
             <Route path="/listenList/:listenListId" element={<ListenList  client={axios} />} />
             {/* En estas ult 2 rutas faltaria pasarle el id de usuario para tener las busquedas personalizadas x usuario, pero esto es un mero bosquejo de frontend */}
-            <Route path="/user/:userId" element={<User  client={axios} />} />
+            <Route path="/user/:currentUserId" element={<User  client={axios} />} />
             {/* lo mismo pasa acá en esta última*/}
           </Routes>
         </Router>
