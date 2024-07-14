@@ -402,16 +402,16 @@ const ListenList = ({client}) => {
                                 />
 
                                 <Label style={{marginBottom: '0px', marginTop: '10px'}}>Cover</Label>
-                                    <Button
-                                            component="label"
-                                            role={undefined}
-                                            variant="contained"
-                                            tabIndex={-1}
-                                            startIcon={<CloudUploadIcon />}
-                                            >
-                                            Upload file
-                                            <VisuallyHiddenInput type="file" />
-                                    </Button>
+                                <Button
+                                        component="label"
+                                        role={undefined}
+                                        variant="contained"
+                                        tabIndex={-1}
+                                        startIcon={<CloudUploadIcon />}
+                                        >
+                                        Upload file
+                                        <VisuallyHiddenInput type="file" />
+                                </Button>
                             </EditAlertText>
                             <EditAlertButtonContainer style={{marginBottom: '0px'}}>
                                 <StyledButtonSecondary style={{marginBottom: '0px'}} onClick={handleCloseAlert}>Cancel</StyledButtonSecondary>

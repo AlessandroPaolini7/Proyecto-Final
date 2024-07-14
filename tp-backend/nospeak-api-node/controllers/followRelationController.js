@@ -32,7 +32,7 @@ exports.createFollowRelation = async (req, res) => {
 
     await newFollowRelation.save();
 
-    return res.status(201).json(newFollowRelation);
+    return res.status(200).json({ mensaje: 'Follow relation created successfully' });
   } catch (error) {
     return res.status(500).json({ mensaje: `Internal server error: ${error}` });
   }

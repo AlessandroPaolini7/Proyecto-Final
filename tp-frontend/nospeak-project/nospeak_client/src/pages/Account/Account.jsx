@@ -126,16 +126,16 @@ export default function Account({client}){
                             <h3>Email</h3>
                             <AccountInput type="email" placeholder="Email address" value={userData.email}/>
                             <h3>Username</h3>
-                            <AccountInput type="text" placeholder="Username" value={userData.nombre}/>
+                            <AccountInput type="text" placeholder="Username" value={userData.name}/>
                             <h3>Password</h3>
-                            <AccountInput type="password" placeholder="Password"/>
+                            <AccountInput type="password" placeholder="Password" value={userData.password}/>
                             <br/>
                             <br/>
                             <StyledButton>Save</StyledButton>
                           </FormContainer>
                         </AccountContainerLeft>
                         <AccountContainerRight>
-                            <Avatar style={{width: '250px', height: '250px', margin: '20px'}} />
+                            <Avatar style={{width: '250px', height: '250px', margin: '20px'}} src={userData.picture}/>
                               <h1>{user.nombre}</h1>
                               <h3 style={{paddingTop: '5px', textAlign:'center'}}>Do you want to log out?</h3>
                               <StyledButtonSecondary style={{width: '60%'}}  onClick={(e) => handleLogout(e)}>Log out</StyledButtonSecondary>
