@@ -35,15 +35,6 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
         });
       };
 
-    //   const handleReview = (songId, index) => {
-    //     const songToReview = songs[index];
-    //     setReviewAlertData({
-    //       songId: songToReview._id,
-    //       songTitle: songToReview.title,
-    //       indexToRemove: index,
-    //     });
-    //   };
-
     const fetchUserHistorial = () => {
         if (user && user.id) {
             client.get(`/api/historiales-usuario/${user.id}`)
