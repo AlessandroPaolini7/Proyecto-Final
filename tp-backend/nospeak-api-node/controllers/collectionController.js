@@ -14,12 +14,13 @@ exports.getCollections = async (req, res) => {
 
 exports.createCollection = async (req, res) => {
   try {
-    const { title, description, creation_date, songs, user, picture } = req.body;
+    const { title, description, songs, user, picture } = req.body;
+
+    console.log(req.body);
 
     const newCollection = new Collection({
       title, 
       description, 
-      creation_date, 
       songs, 
       user, 
       picture

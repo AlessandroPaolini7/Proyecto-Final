@@ -43,14 +43,27 @@ import {
     EditAlertText, 
 } from './styles';
 import { Navigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { styled } from '@mui/material/styles';
 
+const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
+});
 
 const columns = [
     { id: 'option', label: '', minWidth: 10 },
     { id: 'title', label: 'Title', minWidth: 170 },
     { id: 'genre', label: 'Genre', minWidth: 100}
-  ];
-
+];
 
 const ArtistPage = ({client}) => {
 
@@ -59,29 +72,25 @@ const ArtistPage = ({client}) => {
     const { artistId } = useParams();
 
     const [deleteAlertData, setDeleteAlertData] = React.useState(null);
-
     const [deleteArtistAlertData, setDeleteArtistAlertData] = React.useState(null);
-
     const [isEditAlertOpen, setIsEditAlertOpen] = useState(false);
-
     const [editedArtist, setEditedArtist] = useState({
         name: '',
         nationality: '',
         followers: '',
         cover: '',
     });
+    const [profilePhoto, setProfilePhoto] = useState(null);
 
     const [goToLibrary, setGoToLibrary] = React.useState(false);
 
     const user = useSelector(state => state.user.user);
 
-
     useEffect(() => {
-
         client.get(`/api/artists/${artistId}/`)
           .then(response => {
-            setArtist(response.data)
-            setEditedArtist(response.data)
+            setArtist(response.data);
+            setEditedArtist(response.data);
           })
           .catch(error => console.error('Error fetching artist:', error));
         
@@ -90,14 +99,14 @@ const ArtistPage = ({client}) => {
           .catch(error => console.error('Error fetching artist songs:', error));
       }, [artistId]);
 
-      const handleDeleteSong = (songId, index) => {
+    const handleDeleteSong = (songId, index) => {
         const songToDelete = songs[index];
         setDeleteAlertData({
           songId: songToDelete._id,
           songTitle: songToDelete.title,
           indexToRemove: index,
         });
-        }
+    };
 
     const handleDeleteConfirm = async () => {
         const updatedSongs = songs.filter(song => song._id !== deleteAlertData.songId);
@@ -107,24 +116,24 @@ const ArtistPage = ({client}) => {
             await client.delete(`/api/songs/${deleteAlertData.songId}/`);
             setDeleteAlertData(null);
         } catch (error) {
-            console.error('Error updating songs of artist:', error);
+            console.error('Error deleting song:', error);
         }
     };
+
     const handleDeleteCancel = () => {
         setDeleteAlertData(null);
         setDeleteArtistAlertData(null);
-      };
+    };
 
     const handleDeleteArtist = () => {
         setDeleteArtistAlertData(true);
-    }
+    };
 
     const handleDeleteArtistConfirm = async () => {
         try {
             await client.delete(`/api/artists/${artistId}/`);
             setDeleteAlertData(null);
             setGoToLibrary(true);
-
         } catch (error) {
             console.error('Error deleting artist:', error);
         }
@@ -133,27 +142,44 @@ const ArtistPage = ({client}) => {
     if (goToLibrary) {
         return <Navigate to="/library" />;
     }
-    
+
     const formatFollowers = (followers) => {
         return followers.toLocaleString();
     };
 
     const handleEditButtonClick = () => {
         setIsEditAlertOpen(true);
-      };
+    };
 
-      const handleCloseAlert = () => {
+    const handleCloseAlert = () => {
         setIsEditAlertOpen(false);
-      };
+    };
 
-      const handleSaveButtonClick = async () => {
+    const handleSaveButtonClick = async () => {
         try {
-            await client.patch(`/api/artists/${artistId}/`, editedArtist);
-            setArtist(editedArtist);
+            const formData = new FormData();
+            formData.append('name', editedArtist.name);
+            formData.append('nationality', editedArtist.nationality);
+            formData.append('followers', editedArtist.followers);
+            if (profilePhoto) {
+                formData.append('profilePhoto', profilePhoto);
+            }
+
+            await client.patch(`/api/artists/${artistId}/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            setArtist({ ...editedArtist, cover: profilePhoto ? URL.createObjectURL(profilePhoto) : editedArtist.cover });
             setIsEditAlertOpen(false);
         } catch (error) {
             console.error('Error updating artist:', error);
         }
+    };
+
+    const handleFileChange = (e) => {
+        setProfilePhoto(e.target.files[0]);
     };
 
     return (
@@ -165,11 +191,11 @@ const ArtistPage = ({client}) => {
                     {artist ? (
                         <CardContainer>
                             <CardLeftContainer>
-                                <ImageCollection src={artist.cover}></ImageCollection>
+                                <ImageCollection src={artist.picture}></ImageCollection>
                             </CardLeftContainer>
 
                             <CardRightContainer style={{ paddingBottom: '30px' }}>
-                                <p style={{ marginBottom: '0', marginTop: '20px' }}>Artista</p>
+                                <p style={{ marginBottom: '0', marginTop: '20px' }}>Artist</p>
                                 <StyledH1 style={{ marginTop: '0px', marginBottom: '0px', fontSize: '3em' }}>{artist.name}</StyledH1>
                                 <p style={{ margin: '0' }}>{artist.nationality}</p>
                                 <p style={{ margin: '0' }}>{formatFollowers(artist.followers)} followers.</p>
@@ -251,47 +277,49 @@ const ArtistPage = ({client}) => {
                 </Overlay>
             )}
             {isEditAlertOpen && (
-                // <Overlay>
-                    <CustomEditAlert>
-                        <EditAlertContent>
-                            <EditAlertTitle>Edit artist</EditAlertTitle>
-                            <EditAlertText>
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Name</Label>
-                                <Input
-                                    type="text"
-                                    value={editedArtist.name}
-                                    onChange={event => setEditedArtist({ ...editedArtist, name: event.target.value })}
-                                />
+                <CustomEditAlert>
+                    <EditAlertContent>
+                        <EditAlertTitle>Edit artist</EditAlertTitle>
+                        <EditAlertText>
+                            <Label style={{marginBottom: '0px', marginTop: '10px'}}>Name</Label>
+                            <Input
+                                type="text"
+                                value={editedArtist.name}
+                                onChange={event => setEditedArtist({ ...editedArtist, name: event.target.value })}
+                            />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Nationality</Label>
-                                <Input
-                                    type="text"
-                                    value={editedArtist.nationality}
-                                    onChange={event => setEditedArtist({ ...editedArtist, nationality: event.target.value })}
-                                />
+                            <Label style={{marginBottom: '0px', marginTop: '10px'}}>Nationality</Label>
+                            <Input
+                                type="text"
+                                value={editedArtist.nationality}
+                                onChange={event => setEditedArtist({ ...editedArtist, nationality: event.target.value })}
+                            />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Followers</Label>
-                                <Input
-                                    type="text"
-                                    value={editedArtist.followers}
-                                    onChange={event => setEditedArtist({ ...editedArtist, followers: event.target.value })}
-                                />
+                            <Label style={{marginBottom: '0px', marginTop: '10px'}}>Followers</Label>
+                            <Input
+                                type="text"
+                                value={editedArtist.followers}
+                                onChange={event => setEditedArtist({ ...editedArtist, followers: event.target.value })}
+                            />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Cover</Label>
-                                <Input
-                                    type="text"
-                                    value={editedArtist.cover}
-                                    onChange={event => setEditedArtist({ ...editedArtist, cover: event.target.value })}
-                                />
-                            </EditAlertText>
-                            <EditAlertButtonContainer>
-                                <StyledButtonSecondary onClick={handleCloseAlert}>Cancel</StyledButtonSecondary>
-                                <StyledButton onClick={handleSaveButtonClick}>Save</StyledButton>
-                            </EditAlertButtonContainer>
-                        </EditAlertContent>
-                    </CustomEditAlert>
-                // </Overlay>
-                
+                            <Label style={{marginBottom: '0px', marginTop: '10px'}}>Cover</Label>
+                            <Button
+                                component="label"
+                                role={undefined}
+                                variant="contained"
+                                tabIndex={-1}
+                                startIcon={<CloudUploadIcon />}
+                            >
+                                Upload file
+                                <VisuallyHiddenInput type="file" onChange={handleFileChange} />
+                            </Button>
+                        </EditAlertText>
+                        <EditAlertButtonContainer>
+                            <StyledButtonSecondary onClick={handleCloseAlert}>Cancel</StyledButtonSecondary>
+                            <StyledButton onClick={handleSaveButtonClick}>Save</StyledButton>
+                        </EditAlertButtonContainer>
+                    </EditAlertContent>
+                </CustomEditAlert>
             )}
             {deleteArtistAlertData && (
                 <Overlay>
@@ -314,4 +342,3 @@ const ArtistPage = ({client}) => {
 }
 
 export default ArtistPage;
-

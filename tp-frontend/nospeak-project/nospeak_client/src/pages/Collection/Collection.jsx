@@ -32,7 +32,21 @@ import{
     EditAlertText, 
 } from '../Artist/styles.js';
 import { Navigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { styled } from '@mui/material/styles';
 
+const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
+});
 
 const columns = [
     { id: 'option', label: '', minWidth: 10 },
@@ -46,7 +60,6 @@ const columnsAlert = [
     { id: 'title', label: 'Title', minWidth: 170 },
     { id: 'artist', label: 'Artist', minWidth: 170 }
   ];
-
 
 const Collection = ({client}) => {
     const { collectionId } = useParams();
@@ -66,15 +79,15 @@ const Collection = ({client}) => {
     const [deleteCollectionAlertData, setDeleteCollectionAlertData] = React.useState(null);
 
     const [editedCollection, setEditedCollection] = useState({
-        titulo: '',
-        descripcion: '',
-        portada: '',
-        usuario: '',
+        title: '',
+        description: '',
+        picture: '',
+        user: '',
     });
 
     const [goToLibrary, setGoToLibrary] = React.useState(false);
 
-    
+    const [profilePhoto, setProfilePhoto] = useState(null);
 
     const handleAddSongsClick = () => {
         try{
@@ -87,10 +100,7 @@ const Collection = ({client}) => {
         } catch (error){
             console.error('Error fetching songs:', error);
         }
-        
     };
-
-
 
     const fetchCollectionAndSongs = async (collectionId) => {
         try {
@@ -116,9 +126,6 @@ const Collection = ({client}) => {
         fetchCollectionAndSongs(collectionId);
       }, [collectionId]);
     
-
-    
-
     const handleDeleteSong = (songId, index) => {
         const songToDelete = collectionSongs[index];
         setDeleteAlertData({
@@ -126,28 +133,29 @@ const Collection = ({client}) => {
           songTitle: songToDelete.title,
           indexToRemove: index,
         });
-        }
+    }
 
-        const handleDeleteConfirm = async () => {
-            const updatedSongs = collectionSongs.filter(song => song._id !== deleteAlertData.songId);
-            setCollectionSongs(updatedSongs);
-        
-            const songsToUpdate = updatedSongs.map(song => ({
-                ...song,
-                artist: song.artist._id,
-            }));
-        
-            try {
-                await client.patch(`/api/collections/${collectionId}/`, { songs: songsToUpdate });
-                setDeleteAlertData(null);
-            } catch (error) {
-                console.error('Error updating collection:', error);
-            }
-        };
+    const handleDeleteConfirm = async () => {
+        const updatedSongs = collectionSongs.filter(song => song._id !== deleteAlertData.songId);
+        setCollectionSongs(updatedSongs);
+    
+        const songsToUpdate = updatedSongs.map(song => ({
+            ...song,
+            artist: song.artist._id,
+        }));
+    
+        try {
+            await client.patch(`/api/collections/${collectionId}/`, { songs: songsToUpdate });
+            setDeleteAlertData(null);
+        } catch (error) {
+            console.error('Error updating collection:', error);
+        }
+    };
+
     const handleDeleteCancel = () => {
         setDeleteAlertData(null);
         setDeleteCollectionAlertData(null);
-      };
+    };
 
     const handleDeleteCollection = () => {
         setDeleteCollectionAlertData(true);
@@ -186,27 +194,43 @@ const Collection = ({client}) => {
         } catch (error) {
           console.error('Error updating collection:', error);
         }
-      };
+    };
 
-      const handleEditButtonClick = () => {
+    const handleEditButtonClick = () => {
         setIsEditAlertOpen(true);
-      };
+    };
 
-      const handleCloseAlert = () => {
+    const handleCloseAlert = () => {
         setIsEditAlertOpen(false);
-      };
+    };
 
-      const handleSaveButtonClick = async () => {
+    const handleSaveButtonClick = async () => {
         try {
-            await client.patch(`/api/collections/${collectionId}/`, editedCollection);
-            setCollection(editedCollection);
+            const formData = new FormData();
+            formData.append('title', editedCollection.title);
+            formData.append('description', editedCollection.description);
+            if (profilePhoto) {
+                formData.append('profilePhoto', profilePhoto);
+            }
+            formData.append('user', editedCollection.user);
+
+            await client.patch(`/api/collections/${collectionId}/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            setCollection({ ...editedCollection, picture: profilePhoto ? URL.createObjectURL(profilePhoto) : editedCollection.picture });
             setIsEditAlertOpen(false);
         } catch (error) {
             console.error('Error updating collection:', error);
         }
     };
-      
-    
+
+    const handleFileChange = (e) => {
+        setProfilePhoto(e.target.files[0]);
+    };
+
     return (
         <>
             <SpotifyBody>
@@ -215,7 +239,7 @@ const Collection = ({client}) => {
                     <CollectionContainer>
                         <CardContainer>
                             <CardLeftContainer>
-                                <ImageCollection src={collection.portada}></ImageCollection>
+                                <ImageCollection src={collection.picture}></ImageCollection>
                             </CardLeftContainer>
                             
                             <CardRightContainer style={{paddingBottom: '30px'}}>
@@ -249,7 +273,6 @@ const Collection = ({client}) => {
                                                 key={column.id}
                                                 align={column.align}
                                                 style={{ minWidth: column.minWidth, backgroundColor: 'transparent', color: '#fff', fontWeight: 'bold' }}
-                                                
                                                 >
                                                 {column.label}
                                                 </TableCell>
@@ -368,40 +391,42 @@ const Collection = ({client}) => {
                 </Overlay>
                 )}
                 {isEditAlertOpen && (
-                // <Overlay>
-                    <CustomEditAlert>
-                        <EditAlertContent>
-                            <EditAlertTitle>Edit collection</EditAlertTitle>
-                            <EditAlertText>
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Title</Label>
-                                <Input
-                                    type="text"
-                                    value={editedCollection.title}
-                                    onChange={event => setEditedCollection({ ...editedCollection, title: event.target.value })}
-                                />
+                <CustomEditAlert>
+                    <EditAlertContent>
+                        <EditAlertTitle>Edit collection</EditAlertTitle>
+                        <EditAlertText>
+                            <Label style={{marginBottom: '0px', marginTop: '10px'}}>Title</Label>
+                            <Input
+                                type="text"
+                                value={editedCollection.title}
+                                onChange={event => setEditedCollection({ ...editedCollection, title: event.target.value })}
+                            />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Description</Label>
-                                <Input
-                                    type="text"
-                                    value={editedCollection.description}
-                                    onChange={event => setEditedCollection({ ...editedCollection, description: event.target.value })}
-                                />
+                            <Label style={{marginBottom: '0px', marginTop: '10px'}}>Description</Label>
+                            <Input
+                                type="text"
+                                value={editedCollection.description}
+                                onChange={event => setEditedCollection({ ...editedCollection, description: event.target.value })}
+                            />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Cover</Label>
-                                <Input
-                                    type="text"
-                                    value={editedCollection.cover}
-                                    onChange={event => setEditedCollection({ ...editedCollection, cover: event.target.value })}
-                                />
-                            </EditAlertText>
-                            <EditAlertButtonContainer>
-                                <StyledButtonSecondary onClick={handleCloseAlert}>Cancel</StyledButtonSecondary>
-                                <StyledButton onClick={handleSaveButtonClick}>Save</StyledButton>
-                            </EditAlertButtonContainer>
-                        </EditAlertContent>
-                    </CustomEditAlert>
-                // </Overlay>
-                
+                            <Label style={{marginBottom: '0px', marginTop: '10px'}}>Cover</Label>
+                            <Button
+                                component="label"
+                                role={undefined}
+                                variant="contained"
+                                tabIndex={-1}
+                                startIcon={<CloudUploadIcon />}
+                            >
+                                Upload file
+                                <VisuallyHiddenInput type="file" onChange={handleFileChange} />
+                            </Button>
+                        </EditAlertText>
+                        <EditAlertButtonContainer>
+                            <StyledButtonSecondary onClick={handleCloseAlert}>Cancel</StyledButtonSecondary>
+                            <StyledButton onClick={handleSaveButtonClick}>Save</StyledButton>
+                        </EditAlertButtonContainer>
+                    </EditAlertContent>
+                </CustomEditAlert>
             )}
             {deleteCollectionAlertData && (
                 <Overlay>
@@ -420,7 +445,7 @@ const Collection = ({client}) => {
                 </Overlay>
             )}
         </>  
-        );
+    );
 }
 
 export default Collection;
