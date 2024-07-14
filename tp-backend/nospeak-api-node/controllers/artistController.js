@@ -13,6 +13,8 @@ exports.createArtist = async (req, res) => {
   try {
     const { name, nationality, followers, picture } = req.body;
 
+    console.log(req.body);
+
     const newArtist = new Artist({
       name, 
       nationality, 

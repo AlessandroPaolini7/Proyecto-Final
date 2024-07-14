@@ -9,8 +9,21 @@ const uploadProfilePicture = upload.single('profilePhoto');
 
 const generateProfilePictureLink = (req, res, next) => {
   if (req.file) {
-    const userName = req.body.name;
-    req.body.picture = `https://i.pravatar.cc/150?u=${userName}`;
+    if (req.body.name){
+      console.log(req.body.name);
+      const userName = req.body.name;
+      req.body.picture = `https://i.pravatar.cc/150?u=${userName}`;
+    }
+    else{
+      console.log("No name");
+      req.body.picture = `https://picsum.photos/id/11/200/300`;
+    }
+    // Eliminar la foto de memoria
+    req.file.buffer = null;
+  }
+  else{
+    console.log("No file");
+    req.body.picture = `https://picsum.photos/id/1/200/300`;
   }
   next();
 };

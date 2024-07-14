@@ -14,21 +14,23 @@ exports.getListenLists = async (req, res) => {
 
 exports.createListenList = async (req, res) => {
   try {
-    const { title, description, creation_date, songs, user} = req.body;
+    const { title, description, songs = [], user, picture} = req.body;
+
+    console.log(req.body);
 
     const newListenList = new ListenList({
       title, 
       description, 
-      creation_date, 
       songs, 
       user,
+      picture
     });
 
     await newListenList.save();
 
     res.status(201).json({ message: 'Listen list created successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 };
 
