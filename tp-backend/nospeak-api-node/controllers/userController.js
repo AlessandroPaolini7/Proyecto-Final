@@ -192,3 +192,32 @@ exports.getUserFollowing = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+exports.getUserNotFollowing = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Obtener todos los usuarios
+    const allUsers = await User.find();
+
+    // Obtener los usuarios que el usuario sigue
+    const followingRelations = await FollowRelation.find({ follower: userId }).populate('following');
+    const followingIds = followingRelations.map(relation => relation.following._id.toString());
+
+    // Filtrar los usuarios que el usuario no sigue
+    const notFollowingUsers = allUsers.filter(user => !followingIds.includes(user._id.toString()) && user._id.toString() !== userId);
+
+    // Obtener estadísticas de cada usuario no seguido
+    const notFollowingWithStats = await Promise.all(notFollowingUsers.map(async (user) => {
+      const followersCount = await FollowRelation.countDocuments({ following: user._id });
+      const reviewsCount = await Review.countDocuments({ user: user._id });
+      const collectionCount = await Collection.countDocuments({ user: user._id });
+
+      return { ...user.toObject(), followersCount, reviewsCount, collectionCount };
+    }));
+
+    res.status(200).json(notFollowingWithStats);
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

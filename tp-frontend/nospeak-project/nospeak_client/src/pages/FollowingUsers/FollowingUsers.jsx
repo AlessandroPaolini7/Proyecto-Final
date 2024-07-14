@@ -55,11 +55,11 @@ const FollowingUsers = ({ client }) => {
     const [loading, setLoading] = useState(true);
     const [deleteAlertData, setDeleteAlertData] = useState(null);
     const [goToUser, setGoToUser] = useState(false);
+    const [notFollowingUsersFlag, setNotFollowingUsersFlag] = useState(false);
 
     useEffect(() => {
         const fetchFollowingUsers = async () => {
             try {
-                user.id = "662ed1466df11d2edff1d8a5";
                 const response = await client.get(`/api/user/following/${user.id}`);
                 setUsersToShow(response.data.reverse());
                 console.log('Following users:', response.data);
@@ -72,6 +72,14 @@ const FollowingUsers = ({ client }) => {
 
         fetchFollowingUsers();
     }, [client, user.id]);
+
+    useEffect(() => {
+        if (usersToShow.length === 0) {
+            setNotFollowingUsersFlag(true);
+        } else {
+            setNotFollowingUsersFlag(false);
+        }
+    }, [usersToShow]);
 
     const handleUnfollow = async (followingId) => {
         try {
@@ -118,14 +126,16 @@ const FollowingUsers = ({ client }) => {
                         <Header users={usersToShow} setFilteredUsers={setUsersToShow}/>
                         <CardContainer style={{flexDirection: 'column', padding: '10px', paddingLeft: '10px', marginBottom: '10px'}}>
                         <StyledH1 style={{ marginTop: '0px', marginBottom: '0px', fontSize: '2em', color: 'white' }}>Friends, critics you like and good people — members you care about.</StyledH1>
-                            <div style={{ marginBottom: '15px', marginTop: '10px' }}>
-                                <PopularText style={{color: 'white'}} >LAST PEOPLE FOLLOWED</PopularText>
+                            <div style={{ marginBottom: '15px', marginTop: '10px', minHeight: '30px' }}>
+                                {notFollowingUsersFlag ? (null) :(
+                                    <PopularText style={{color: 'white'}} >LAST PEOPLE FOLLOWED</PopularText>
+                                )}
                             </div>
                             <div style={{ display: 'flex' }}>
                                 {usersToShow.slice(0, 5).map((user) => (
                                     <Link key={user._id} to={`/user/${user._id}`} style={{textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', marginRight: '30px'}}>
                                         <UserContainer key={user._id}>
-                                            <Avatar sx={{ height: '100px', width: '100px' }} src={`https://i.pravatar.cc/150?u=${user.name}`} />
+                                            <Avatar sx={{ height: '100px', width: '100px' }} src={user.picture} />
                                             <UserInfo>
                                                 <Username>{user.name}</Username>
                                                 <Stats>
@@ -142,55 +152,61 @@ const FollowingUsers = ({ client }) => {
                     </div>
                         <TableContainerStyled>
                             <TableContainer sx={{ maxHeight: 440 }} style={{width: '96%'}}>
-                                <Table sx={{ margin: 0, padding: '10px' }}>
-                                    <TableHead>
-                                        <TableRow>
-                                            {columns.map((column) => (
-                                                <TableCell
-                                                    key={column.id}
-                                                    align={column.align}
-                                                    style={{ minWidth: column.minWidth, backgroundColor: 'transparent', color: '#fff', fontWeight: 'bold' }}
-                                                >
-                                                    {column.label}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody >
-                                        {usersToShow.map((user, index) => (
-                                            <TableRow hover role="checkbox" tabIndex={-1} key={user._id} >
+                                {notFollowingUsersFlag ? (
+                                    <div style={{ color: 'white', textAlign: 'center', padding: '20px' }}>
+                                        <p>You are not following any users yet. Visit our <Link to="/recommended-users" style={{ color: '#ffb13b', textDecoration: 'underline' }}>People like you</Link> tab to find similar people.</p>
+                                    </div>
+                                ) : (
+                                    <Table sx={{ margin: 0, padding: '10px' }}>
+                                        <TableHead>
+                                            <TableRow>
                                                 {columns.map((column) => (
                                                     <TableCell
                                                         key={column.id}
                                                         align={column.align}
-                                                        sx={{ backgroundColor: 'transparent', color: '#fff'}}
+                                                        style={{ minWidth: column.minWidth, backgroundColor: 'transparent', color: '#fff', fontWeight: 'bold' }}
                                                     >
-                                                        {column.id === 'username' ? (
-                                                            <Link key={index} to={`/user/${user._id}`} style={{ width: 100, textDecoration: 'none', color: 'inherit' }}>
-                                                                <AvatarContainer>
-                                                                    <Avatar src={`https://i.pravatar.cc/150?u=${user.name}`} />
-                                                                    <UserInfo>
-                                                                        <Username>{user.name}</Username>
-                                                                        <Reviews>{user.collectionCount} collections</Reviews>
-                                                                    </UserInfo>
-                                                                </AvatarContainer>
-                                                            </Link>
-                                                        ) : null}
-                                                        {column.id === 'followers' ? (
-                                                            <span>{user.followersCount}</span>
-                                                        ) : null}
-                                                        {column.id === 'reviews' ? (
-                                                            <span>{user.reviewsCount}</span>
-                                                        ) : null}
-                                                        {column.id === 'actions' ? (
-                                                            <PersonAddDisabledIcon style={{ color: 'white', cursor: 'pointer' }} onClick={() => handleUnfollowClick(user._id)} />
-                                                        ) : null}
+                                                        {column.label}
                                                     </TableCell>
                                                 ))}
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                        </TableHead>
+                                        <TableBody >
+                                            {usersToShow.map((user, index) => (
+                                                <TableRow hover role="checkbox" tabIndex={-1} key={user._id} >
+                                                    {columns.map((column) => (
+                                                        <TableCell
+                                                            key={column.id}
+                                                            align={column.align}
+                                                            sx={{ backgroundColor: 'transparent', color: '#fff'}}
+                                                        >
+                                                            {column.id === 'username' ? (
+                                                                <Link key={index} to={`/user/${user._id}`} style={{ width: 100, textDecoration: 'none', color: 'inherit' }}>
+                                                                    <AvatarContainer>
+                                                                        <Avatar src={user.picture} />
+                                                                        <UserInfo>
+                                                                            <Username>{user.name}</Username>
+                                                                            <Reviews>{user.collectionCount} collections</Reviews>
+                                                                        </UserInfo>
+                                                                    </AvatarContainer>
+                                                                </Link>
+                                                            ) : null}
+                                                            {column.id === 'followers' ? (
+                                                                <span>{user.followersCount}</span>
+                                                            ) : null}
+                                                            {column.id === 'reviews' ? (
+                                                                <span>{user.reviewsCount}</span>
+                                                            ) : null}
+                                                            {column.id === 'actions' ? (
+                                                                <PersonAddDisabledIcon style={{ color: 'white', cursor: 'pointer' }} onClick={() => handleUnfollowClick(user._id)} />
+                                                            ) : null}
+                                                        </TableCell>
+                                                    ))}
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                )}
                             </TableContainer>
                         </TableContainerStyled>
                     </CollectionContainer>
