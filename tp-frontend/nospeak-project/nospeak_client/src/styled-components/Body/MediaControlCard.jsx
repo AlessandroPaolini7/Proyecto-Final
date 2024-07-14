@@ -35,15 +35,6 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
         });
       };
 
-      const handleReview = (songId, index) => {
-        const songToReview = songs[index];
-        setReviewAlertData({
-          songId: songToReview._id,
-          songTitle: songToReview.title,
-          indexToRemove: index,
-        });
-      };
-
     const fetchUserHistorial = () => {
         if (user && user.id) {
             client.get(`/api/historiales-usuario/${user.id}`)
@@ -93,7 +84,22 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
             console.error('Error al actualizar el historial:', error);
         }
     };
-    
+    const handleReview = (songId, index, newRating) => {
+        const song = songs[index];
+        const updatedSongs = songs.map((s, i) => 
+          i === index ? {...s, userRating: newRating} : s
+        );
+        setSongs(updatedSongs);
+        
+        setReviewAlertData({
+          songId: songId,
+          songTitle: song.title,
+          indexToRemove: index,
+          currentRating: newRating,
+          reviewId: song.reviewId || '', 
+          currentReview: song.userReview || ''
+        });
+      };
     return (
         <>
             <TitleContainer>
@@ -123,18 +129,6 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
                                     <IconButton aria-label="delete" onClick={() => handleDelete(song._id, index)}>
                                         <StyledDeleteIcon sx={{ color: 'white' }} />
                                     </IconButton>)}
-                                    {/* <IconButton
-                                        aria-label="play/pause"
-                                        onClick={() => handleFavoriteClick(song._id)}
-                                    >
-                                        <StarIcon
-                                            sx={{
-                                                height: 35,
-                                                width: 35,
-                                                color: isSongInHistorial(song._id) ? '#FFA130' : 'white',
-                                            }}
-                                        />
-                                    </IconButton> */}
                                     {user.isAdmin && (
                                     <IconButton aria-label="edit">
                                         <Link to={{ pathname: `/song/${song._id}` }}>
@@ -143,18 +137,17 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
                                     </IconButton>
                                     )}
                                     <Rating
-                                            name="hover-feedback"
-                                            value={value}
-                                            precision={0.5}
-                                            onChange={(event, newValue) => {
-                                            setValue(newValue);
-                                            }}
-                                            onChangeActive={(event, newHover) => {
-                                            setHover(newHover);
-                                            }}
-                                            onClick={() => handleReview(song._id, index)}
-                                            emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
-                                        />
+                                    name={`rating-${song._id}`}
+                                    value={song.userRating || 0}
+                                    precision={0.5}
+                                    onChange={(event, newValue) => {
+                                        handleReview(song._id, index, newValue);
+                                    }}
+                                    onChangeActive={(event, newHover) => {
+                                        setHover(newHover);
+                                    }}
+                                    emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
+                                    />
                                         <CommentIcon
                                             sx={{
                                                 height: 25,

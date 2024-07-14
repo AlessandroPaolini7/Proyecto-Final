@@ -19,17 +19,19 @@ import{
     EditAlertContent,
     EditAlertText, 
 } from '../../pages/Artist/styles.js';
+import Rating from '@mui/material/Rating';
 
 
 export default function Body({ client }) {
     const [filteredSongs, setFilteredSongs] = useState([]);
     const [songs, setSongs] = React.useState([]);
-
     const [deleteAlertData, setDeleteAlertData] = React.useState(null);
-
+    const [score, setScore] = useState(0);
     const user = useSelector(state => state.user.user);
     const [userPlaylists, setUserPlaylists] = useState([]);
     const [reviewAlertData, setReviewAlertData] = useState(null);
+    const [review, setReview] = useState('');
+    const [rating, setRating] = useState(0);   
 
     const handleDeleteConfirm = async (alertData) => {
         try {
@@ -63,6 +65,83 @@ export default function Body({ client }) {
 
     }, [user]);
 
+    React.useEffect(() => {
+        if (reviewAlertData) {
+          setRating(reviewAlertData.currentRating || 0);
+          setReview('');
+        }
+      }, [reviewAlertData]);
+
+      React.useEffect(() => {
+        const fetchSongs = async () => {
+          try {
+            const [songsResponse, reviewsResponse] = await Promise.all([
+              axios.get('/api/songs/'),
+              axios.get(`/api/reviews-user/${user.id}`)
+            ]);
+      
+            const songsData = songsResponse.data;
+            const userReviews = reviewsResponse.data;
+      
+            const songsWithReviews = songsData.map(song => {
+              const userReview = userReviews.find(review => review.song._id === song._id);
+              return userReview 
+                ? {...song, userRating: userReview.score, userReview: userReview.description, reviewId: userReview._id}
+                : song;
+            });
+      
+            setSongs(songsWithReviews);
+            setFilteredSongs(songsWithReviews);
+          } catch (error) {
+            console.error('Error al obtener las canciones o reviews:', error);
+          }
+        };
+      
+        fetchSongs();
+      }, [user]);
+    
+      const handleSaveReview = async () => {
+        try {
+          let response;
+          if (reviewAlertData.reviewId) {
+            response = await axios.patch(`/api/reviews/${reviewAlertData.reviewId}`, {
+              score: rating,
+              description: review
+            });
+          } else {
+            response = await axios.post('/api/reviews', {
+              song: reviewAlertData.songId,
+              user: user.id,
+              score: rating,
+              description: review
+            });
+          }
+    
+          if (response.status === 200 || response.status === 201) {
+            console.log('Review saved/updated successfully');
+            
+            const updatedSongs = songs.map(song => 
+              song._id === reviewAlertData.songId 
+                ? {...song, userRating: rating, userReview: review, reviewId: response.data._id}
+                : song
+            );
+            setSongs(updatedSongs);
+            setFilteredSongs(updatedSongs);
+            
+            setReviewAlertData({
+              ...reviewAlertData,
+              reviewId: response.data._id
+            });
+            
+            setReview('');
+            setRating(0);
+          }
+        } catch (error) {
+          console.error('Error saving/updating review:', error);
+        }
+      };
+
+
     return (
         <>
             <BodyContainer>
@@ -93,24 +172,34 @@ export default function Body({ client }) {
                     </AlertContainer>
                 </Overlay>
             )}
-            {reviewAlertData && (
-                    <CustomEditAlert>
-                        <EditAlertContent>
-                            <EditAlertTitle>{reviewAlertData?.songTitle} review</EditAlertTitle>
-                            <EditAlertText>
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Review description</Label>
-                                <Input
-                                    type="text"
-                                    value={""}
-                                />
-                            </EditAlertText>
-                            <EditAlertButtonContainer>
-                                <StyledButtonSecondary >Cancel</StyledButtonSecondary>
-                                <StyledButton >Save</StyledButton>
-                            </EditAlertButtonContainer>
-                        </EditAlertContent>
-                    </CustomEditAlert>
-            )}
+ {reviewAlertData && (
+  <CustomEditAlert>
+    <EditAlertContent>
+      <EditAlertTitle>{reviewAlertData?.songTitle} review</EditAlertTitle>
+      <EditAlertText>
+        <Label style={{marginBottom: '10px', marginTop: '10px'}}>Rating</Label>
+        <Rating
+          name="review-rating"
+          value={rating}
+          precision={0.5}
+          onChange={(event, newValue) => {
+            setRating(newValue);
+          }}
+        />
+        <Label style={{marginBottom: '0px', marginTop: '10px'}}>Review description</Label>
+        <Input
+          type="text"
+          value={review}
+          onChange={(e) => setReview(e.target.value)}
+        />
+      </EditAlertText>
+      <EditAlertButtonContainer>
+        <StyledButtonSecondary onClick={() => setReviewAlertData(null)}>Close</StyledButtonSecondary>
+        <StyledButton onClick={handleSaveReview}>Save</StyledButton>
+      </EditAlertButtonContainer>
+    </EditAlertContent>
+  </CustomEditAlert>
+)}
         </>
         
     );
