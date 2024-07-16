@@ -87,7 +87,7 @@ export default function Login({ client, testing }) {
         <NavLogin>
           <img src={process.env.PUBLIC_URL + '/logo_nospeak.png'} alt="logo" style={{ width: '130px', height: '60%' }}/>
         </NavLogin>
-        <FormLogin>
+        <FormLogin style={{height: '50%'}}>
           <StyledH1>Log in to NoSpeak</StyledH1>
           <span>Username</span>
           <LoginInput value={user_name} onChange={(e) => setUserName(e.target.value)} type="text" placeholder="Username" />

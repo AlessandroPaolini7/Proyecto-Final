@@ -164,7 +164,7 @@ export default function Register({ client }) {
       <NavLogin>
         <img src={process.env.PUBLIC_URL + '/logo_nospeak.png'} alt="logo" style={{ width: '130px', height: '60%' }}/>
       </NavLogin>
-      <FormLogin>
+      <FormLogin style={{height: '70%'}}>
         <StyledH1 style={{marginBottom: '5px'}}>Sign up for NoSpeak</StyledH1>
         <span>What’s your email address?</span>
         <LoginInput value={email} onChange={handleEmailChange} type="email" placeholder="Email" />
