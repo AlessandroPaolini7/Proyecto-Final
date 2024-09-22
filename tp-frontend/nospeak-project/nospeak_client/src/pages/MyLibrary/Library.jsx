@@ -48,8 +48,8 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 const columns = [
-  { id: 'titulo', label: 'Titulo', minWidth: 170 },
-  { id: 'artista', label: 'Artista', minWidth: 170 },
+  { id: 'title', label: 'Title', minWidth: 170 },
+  { id: 'artist', label: 'Artist', minWidth: 170 },
 ];
 
 const Library = ({ client }) => {
@@ -97,7 +97,7 @@ const Library = ({ client }) => {
     cover: '',
     user: user.id,
   });
-
+  const [userReviews, setUserReviews] = useState([]);
   const [recommendedSongs, setRecommendedSongs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -137,6 +137,48 @@ const Library = ({ client }) => {
         setLoading(false);
       });
   }, []);
+
+  const fetchUserReviews = async () => {
+    if (user && user.id) {
+      try {
+        // Obtener las reviews del usuario
+        const response = await client.get(`/api/reviews-user/${user.id}`);
+        const reviews = response.data;
+  
+        // Filtrar reviews con score >= 3
+        const filteredReviews = reviews.filter(review => review.score >= 3);
+  
+        // Obtener las últimas 5 reviews filtradas
+        const lastFiveReviews = filteredReviews.slice(-5);
+  
+        // Formatear los datos para el endpoint de recomendaciones
+        const songNames = lastFiveReviews.map(review => ({
+          trackname: review.song.title,
+          score: review.score
+        }));
+
+        console.log('Canciones para recomendar:', songNames);
+  
+        // Hacer la llamada al endpoint de recomendaciones
+        const recommendationResponse = await client.post(
+          'http://127.0.0.1:8000/nospeak-app/api/recomendaciones/',
+          { song_names: songNames }
+        );
+
+        console.log('Recomendaciones:', recommendationResponse.data);
+  
+        // Actualizar el estado con las recomendaciones
+        setRecommendedSongs(recommendationResponse.data.recommended_songs);
+      } catch (error) {
+        console.error('Error fetching user historial or recommendations:', error);
+      }
+    }
+  };
+  
+  useEffect(() => {
+    fetchUserReviews();
+  }, [user]);
+  
 
   if (loading) {
     return <CircularIndeterminate />;
@@ -346,7 +388,7 @@ const Library = ({ client }) => {
                 <Link key={index} to={`/artist/${artist._id}`}>
                   <ArtistBox key={index}>
                     <ArtistImage
-                      src={`https://i.pravatar.cc/150?u=${artist.name}`}
+                      src={artist.picture}
                       alt={artist.name}
                       onClick={() => {
                         setGoToArtist(true);
@@ -400,8 +442,8 @@ const Library = ({ client }) => {
                             sx={{ backgroundColor: 'transparent', color: '#fff' }}
                             key={column.id}
                           >
-                            {column.id === 'title' && columnIndex === 0 ? <span style={{ color: 'white' }}>{song.title}</span> : null}
-                            {column.id === 'artist' && columnIndex === 1 ? <span>{song.artist}</span> : null}
+                            {column.id === 'title' && columnIndex === 0 ? <span style={{ color: 'white' }}>{song.titulo}</span> : null}
+                            {column.id === 'artist' && columnIndex === 1 ? <span>{song.artista}</span> : null}
                           </TableCell>
                         ))}
                       </TableRow>

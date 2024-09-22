@@ -61,7 +61,7 @@ const FollowingUsers = ({ client }) => {
         const fetchFollowingUsers = async () => {
             try {
                 const response = await client.get(`/api/user/following/${user.id}`);
-                setUsersToShow(response.data.reverse());
+                setUsersToShow(response.data.filter(user => !user.name.includes("admin")).reverse());
                 console.log('Following users:', response.data);
                 setLoading(false);
             } catch (error) {

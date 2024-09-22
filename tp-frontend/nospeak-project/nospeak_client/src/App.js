@@ -14,6 +14,7 @@ import Library from './pages/MyLibrary/Library';
 import Artist from './pages/Artist/Artist';
 import Album from './pages/Album/Album';
 import User from './pages/User/User';
+import Bot from './pages/Bot/Bot';
 import RecommendedUsers from './pages/RecommendedUsers/RecommendedUsers';
 import FollowingUsers from './pages/FollowingUsers/FollowingUsers';
 import { useSelector } from 'react-redux';
@@ -54,6 +55,7 @@ function App() {
             {/* En estas ult 2 rutas faltaria pasarle el id de usuario para tener las busquedas personalizadas x usuario, pero esto es un mero bosquejo de frontend */}
             <Route path="/user/:currentUserId" element={<User  client={axios} />} />
             {/* lo mismo pasa acá en esta última*/}
+            <Route path="/bot" element={<Bot  client={axios} />} />
           </Routes>
         </Router>
       </div>

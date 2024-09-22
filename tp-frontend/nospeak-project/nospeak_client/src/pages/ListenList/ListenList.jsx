@@ -111,6 +111,7 @@ const ListenList = ({client}) => {
           const response = await client.get(`/api/listenLists/${listenListId}/`);
           console.log(response.data);
           console.log(response.data.songs);
+          console.log(listenList.picture)
           setListenList(response.data);    
           setListenListSongs(response.data.songs);
           response.data.user = response.data.user._id
@@ -229,7 +230,7 @@ const ListenList = ({client}) => {
                     <CollectionContainer>
                         <CardContainer>
                             <CardLeftContainer>
-                                <ImageCollection src={listenList.cover}></ImageCollection>
+                                <ImageCollection src={listenList.picture}></ImageCollection>
                             </CardLeftContainer>
                             
                             <CardRightContainer style={{paddingBottom: '30px'}}>

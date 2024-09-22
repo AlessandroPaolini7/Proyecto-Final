@@ -61,7 +61,7 @@ const RecommendendUsers = ({ client }) => {
             try {
                 console.log('User:', user.id);
                 const response = await client.get(`/api/user/not-following/${user.id}`);
-                setUsersToShow(response.data.reverse());
+                setUsersToShow(response.data.filter(user => !user.name.includes("admin")).reverse());
                 console.log('Following users:', response.data);
                 setLoading(false);
             } catch (error) {

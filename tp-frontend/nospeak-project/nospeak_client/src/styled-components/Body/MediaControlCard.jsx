@@ -163,7 +163,7 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
                         <CardMedia
                             component="img"
                             sx={{ width: 160 }}
-                            image={process.env.PUBLIC_URL + '/logo_nospeak.png'}
+                            src={song.artist.picture}
                             alt={`${song.title} album cover`}
                         />
                         </StyledCard>

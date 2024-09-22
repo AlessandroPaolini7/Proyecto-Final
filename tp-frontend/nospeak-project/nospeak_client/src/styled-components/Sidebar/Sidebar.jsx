@@ -10,6 +10,7 @@ import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import axios from '../../interceptors/axiosConfig.js';
+import AssistantIcon from '@mui/icons-material/Assistant';
 
 export default function Sidebar() {
   const [collections, setCollections] = useState([]);
@@ -23,6 +24,7 @@ export default function Sidebar() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [goToRecommendedUsers, setGoToRecommendedUsers] = useState(false);
   const [goToSongs, setGoToSongs] = useState(false);
+  const [goToBot, setGoToBot] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -71,6 +73,9 @@ export default function Sidebar() {
   if (goToSongs && location.pathname !== '/songs') {
     return <Navigate to="/songs" />;
   }
+  if (goToBot && location.pathname !== '/bot') {
+    return <Navigate to="/bot" />;
+  }
 
   return (
     <>
@@ -85,6 +90,7 @@ export default function Sidebar() {
             <SidebarChoice onClick={() => setGoToLibrary(true)} Icon={LibraryMusicIcon} isActive={location.pathname === '/library'} />
             <SidebarChoice Icon={ConnectWithoutContactIcon} onClick={() => setGoToRecommendedUsers(true)} isActive={location.pathname === '/recommended-users'} />
             <SidebarChoice Icon={QueueMusicIcon} onClick={() => setGoToSongs(true)} isActive={location.pathname === '/songs'} />
+            <SidebarChoice Icon={AssistantIcon} onClick={() => setGoToBot(true)} isActive={location.pathname === '/bot'} />
           </ChoicesContainer>
         </NavContainer>
       ) : (
@@ -95,6 +101,7 @@ export default function Sidebar() {
           <SidebarChoice title="Library" onClick={() => setGoToLibrary(true)} Icon={LibraryMusicIcon} isActive={location.pathname === '/library'} />
           <SidebarChoice title="People like you" Icon={ConnectWithoutContactIcon} onClick={() => setGoToRecommendedUsers(true)} isActive={location.pathname === '/recommended-users'} />
           <SidebarChoice title="Songs" Icon={QueueMusicIcon} onClick={() => setGoToSongs(true)} isActive={location.pathname === '/songs'} />
+          <SidebarChoice title="Talk with Chipi" Icon={AssistantIcon} onClick={() => setGoToBot(true)} isActive={location.pathname === '/bot'} />
           <br />
           <br />
           <Playlists>COLLECTIONS</Playlists>
