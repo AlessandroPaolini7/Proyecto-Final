@@ -2,12 +2,11 @@ import React from 'react'
 import Sidebar from '../../styled-components/Sidebar/Sidebar'
 import { BodyContainer} from '../../styled-components/Body/styles';
 import { SpotifyBody } from '../Home/styles';
-import Footer from '../../styled-components/Footer/Footer';
 import Header from '../../styled-components/Body/Header';
 import { CategoryContainer, CategoryBox, CategoryName } from './styles.js';
 
 
-const Search = () => {
+const Search = ({ client }) => {
 
     const generos = ['For You', 'New Releases', 'Rankings', 'Live', 'Cumbia', 'Reggaeton', 'Rock', 'Pop', 'Hip Hop', 'Indie', 'Jazz', 'Blues', 'Latina', 'Country', 'Nacional'];
     const colores = [
@@ -30,7 +29,7 @@ const Search = () => {
             <SpotifyBody>
                 <Sidebar/>
                 <BodyContainer css={`align-items: center;`}>
-                    <Header/>
+                    <Header client={client}/>
                     <h1 style={{color: '#fff', marginLeft: '10px'}}>Categories</h1>
 
                     <CategoryContainer>
@@ -46,7 +45,6 @@ const Search = () => {
                     
                 </BodyContainer>
             </SpotifyBody>
-            <Footer/>
         </>  )
 }
 

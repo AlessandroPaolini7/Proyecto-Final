@@ -50,13 +50,15 @@ const FormLogin = styled.div`
   background-color: black;
   padding: 10px;
   margin-top: 20px;
+  margin-bottom: 20px;
   color: white;
   border-radius: 8px;
   width: 50%;
+  min-height: 80vh;
 
   @media (max-width: 768px) {
-    width: 90%; /* Reducción del ancho en dispositivos móviles */
-    font-size: smaller; /* Reducción del tamaño de fuente en dispositivos móviles */
+    width: 90%;
+    font-size: smaller;
   }
 `;
 
@@ -101,8 +103,8 @@ const LoginButton = styled.button`
   color: #000;
   font-weight: bold;
   font-size: 20px;
-  display: block; /* Cambiado a block para ocupar todo el ancho disponible */
-  width: 100%; /* Ancho al 100% para ocupar todo el espacio disponible */
+  display: block;
+  width: 100%;
   font-family: var(
     --font-family,
     CircularSp,
@@ -113,14 +115,20 @@ const LoginButton = styled.button`
     CircularSp-Deva,
     var(--fallback-fonts, sans-serif)
   );
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 
   @media (min-width: 768px) {
-    width: 40%; /* Ancho para el botón en pantallas de tamaño pc */
-    margin: 10px auto; /* Centrar el botón en pantallas de tamaño pc */
+    width: 40%;
+    margin: 10px auto;
   }
 
   @media (max-width: 540px) {
-    font-size: 16px; /* Reducción del tamaño de fuente en dispositivos móviles más pequeños */
+    font-size: 16px;
   }
 `;
 

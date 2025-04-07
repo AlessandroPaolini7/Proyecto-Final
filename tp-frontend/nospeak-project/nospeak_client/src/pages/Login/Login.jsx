@@ -9,7 +9,7 @@ import Alert from '../../styled-components/Alert/Alert.jsx';
 
 export default function Login({ client, testing }) {
   const dispatch = useDispatch();
-  const [name, setName] = useState('');
+  const [user_name, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
@@ -23,23 +23,23 @@ export default function Login({ client, testing }) {
 
   const handleLogin = async () => {
     try {
-      if (!name || !password) {
+      if (!user_name || !password) {
         setError('Please enter your username and password.');
         setSuccessMessage('');
         return;
       }
 
-      const response = await client.post('/api/usuarios-login/', {
-        nombre: name,
+      const response = await client.post('/api/user-login/', {
+        name: user_name,
         password,
       });
       
-      const { token, userId, nombre, isAdmin } = response.data;
+      const { token, userId, name, isAdmin } = response.data;
       localStorage.setItem('token', token);
       
       dispatch(loginSuccess({ 
         isAuthenticated: true,
-        user: { id: userId, nombre, isAdmin: isAdmin},
+        user: { id: userId, name, isAdmin: isAdmin},
       }));
 
       setSuccessMessage('Successful login. Redirecting...');
@@ -90,7 +90,7 @@ export default function Login({ client, testing }) {
         <FormLogin>
           <StyledH1>Log in to NoSpeak</StyledH1>
           <span>Username</span>
-          <LoginInput value={name} onChange={(e) => setName(e.target.value)} type="text" placeholder="Username" />
+          <LoginInput value={user_name} onChange={(e) => setUserName(e.target.value)} type="text" placeholder="Username" />
           <span>Password</span>
           <LoginInput value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Password" />
           <LoginButton onClick={handleLogin}>

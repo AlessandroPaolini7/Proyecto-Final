@@ -2,9 +2,8 @@ import React from 'react';
 import Sidebar from '../../styled-components/Sidebar/Sidebar';
 import { BodyContainer } from '../../styled-components/Body/styles';
 import { SpotifyBody } from '../../pages/Home/styles.js';
-import Footer from '../../styled-components/Footer/Footer';
 import {
-    PlaylistContainer,
+    CollectionContainer,
     CardContainer,
     TableContainerStyled,
     StyledH1
@@ -35,7 +34,7 @@ import {
 } from '../../styled-components/styles';
 import { 
     CardRightContainer, 
-    ImagePlaylist, 
+    ImageCollection, 
     CardLeftContainer, 
     EditAlertTitle,
     CustomEditAlert,
@@ -44,15 +43,27 @@ import {
     EditAlertText, 
 } from './styles';
 import { Navigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { styled } from '@mui/material/styles';
 
+const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
+});
 
 const columns = [
     { id: 'option', label: '', minWidth: 10 },
-    { id: 'titulo', label: 'Titulo', minWidth: 170 },
-    { id: 'duracion', label: 'Duracion', minWidth: 100},
-    { id: 'album', label: 'Album', minWidth: 170 }
-  ];
-
+    { id: 'title', label: 'Title', minWidth: 170 },
+    { id: 'genre', label: 'Genre', minWidth: 100}
+];
 
 const ArtistPage = ({client}) => {
 
@@ -61,72 +72,68 @@ const ArtistPage = ({client}) => {
     const { artistId } = useParams();
 
     const [deleteAlertData, setDeleteAlertData] = React.useState(null);
-
     const [deleteArtistAlertData, setDeleteArtistAlertData] = React.useState(null);
-
     const [isEditAlertOpen, setIsEditAlertOpen] = useState(false);
-
     const [editedArtist, setEditedArtist] = useState({
-        nombre: '',
-        nacionalidad: '',
-        nro_seguidores: '',
-        portada: '',
+        name: '',
+        nationality: '',
+        followers: '',
+        cover: '',
     });
+    const [profilePhoto, setProfilePhoto] = useState(null);
 
     const [goToLibrary, setGoToLibrary] = React.useState(false);
 
     const user = useSelector(state => state.user.user);
 
-
     useEffect(() => {
-
-        client.get(`/api/artistas/${artistId}/`)
+        client.get(`/api/artists/${artistId}/`)
           .then(response => {
-            setArtist(response.data)
-            setEditedArtist(response.data)
+            setArtist(response.data);
+            setEditedArtist(response.data);
           })
           .catch(error => console.error('Error fetching artist:', error));
         
-        client.get(`/api/canciones-artista/${artistId}/`)
+        client.get(`/api/songs-artist/${artistId}/`)
           .then(response => setSongs(response.data))
           .catch(error => console.error('Error fetching artist songs:', error));
       }, [artistId]);
 
-      const handleDeleteSong = (songId, index) => {
+    const handleDeleteSong = (songId, index) => {
         const songToDelete = songs[index];
         setDeleteAlertData({
           songId: songToDelete._id,
-          songTitle: songToDelete.titulo,
+          songTitle: songToDelete.title,
           indexToRemove: index,
         });
-        }
+    };
 
     const handleDeleteConfirm = async () => {
         const updatedSongs = songs.filter(song => song._id !== deleteAlertData.songId);
         setSongs(updatedSongs);
 
         try {
-            await client.delete(`/api/canciones/${deleteAlertData.songId}/`);
+            await client.delete(`/api/songs/${deleteAlertData.songId}/`);
             setDeleteAlertData(null);
         } catch (error) {
-            console.error('Error updating songs of artist:', error);
+            console.error('Error deleting song:', error);
         }
     };
+
     const handleDeleteCancel = () => {
         setDeleteAlertData(null);
         setDeleteArtistAlertData(null);
-      };
+    };
 
     const handleDeleteArtist = () => {
         setDeleteArtistAlertData(true);
-    }
+    };
 
     const handleDeleteArtistConfirm = async () => {
         try {
-            await client.delete(`/api/artistas/${artistId}/`);
+            await client.delete(`/api/artists/${artistId}/`);
             setDeleteAlertData(null);
             setGoToLibrary(true);
-
         } catch (error) {
             console.error('Error deleting artist:', error);
         }
@@ -135,34 +142,44 @@ const ArtistPage = ({client}) => {
     if (goToLibrary) {
         return <Navigate to="/library" />;
     }
-    
+
     const formatFollowers = (followers) => {
         return followers.toLocaleString();
     };
 
-
-    const formatDuration = (durationInSeconds) => {
-        const minutes = Math.floor(durationInSeconds / 60);
-        const seconds = durationInSeconds % 60;
-        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    };
-
     const handleEditButtonClick = () => {
         setIsEditAlertOpen(true);
-      };
+    };
 
-      const handleCloseAlert = () => {
+    const handleCloseAlert = () => {
         setIsEditAlertOpen(false);
-      };
+    };
 
-      const handleSaveButtonClick = async () => {
+    const handleSaveButtonClick = async () => {
         try {
-            await client.patch(`/api/artistas/${artistId}/`, editedArtist);
-            setArtist(editedArtist);
+            const formData = new FormData();
+            formData.append('name', editedArtist.name);
+            formData.append('nationality', editedArtist.nationality);
+            formData.append('followers', editedArtist.followers);
+            if (profilePhoto) {
+                formData.append('profilePhoto', profilePhoto);
+            }
+
+            await client.patch(`/api/artists/${artistId}/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            setArtist({ ...editedArtist, cover: profilePhoto ? URL.createObjectURL(profilePhoto) : editedArtist.cover });
             setIsEditAlertOpen(false);
         } catch (error) {
             console.error('Error updating artist:', error);
         }
+    };
+
+    const handleFileChange = (e) => {
+        setProfilePhoto(e.target.files[0]);
     };
 
     return (
@@ -170,18 +187,18 @@ const ArtistPage = ({client}) => {
             <SpotifyBody>
                 <Sidebar />
                 <BodyContainer css={`align-items: center;`}>
-                    <PlaylistContainer>
+                    <CollectionContainer>
                     {artist ? (
                         <CardContainer>
                             <CardLeftContainer>
-                                <ImagePlaylist src={artist.portada}></ImagePlaylist>
+                                <ImageCollection src={artist.picture}></ImageCollection>
                             </CardLeftContainer>
 
                             <CardRightContainer style={{ paddingBottom: '30px' }}>
-                                <p style={{ marginBottom: '0', marginTop: '20px' }}>Artista</p>
-                                <StyledH1 style={{ marginTop: '0px', marginBottom: '0px', fontSize: '3em' }}>{artist.nombre}</StyledH1>
-                                <p style={{ margin: '0' }}>{artist.nacionalidad}</p>
-                                <p style={{ margin: '0' }}>{formatFollowers(artist.nro_seguidores)} oyentes.</p>
+                                <p style={{ marginBottom: '0', marginTop: '20px' }}>Artist</p>
+                                <StyledH1 style={{ marginTop: '0px', marginBottom: '0px', fontSize: '3em' }}>{artist.name}</StyledH1>
+                                <p style={{ margin: '0' }}>{artist.nationality}</p>
+                                <p style={{ margin: '0' }}>{formatFollowers(artist.followers)} followers.</p>
                             </CardRightContainer>
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginRight:'20px' }}>
@@ -226,14 +243,11 @@ const ArtistPage = ({client}) => {
                                                         {column.id === 'option' && columnIndex === 0 && user.isAdmin ? (
                                                             <StyledDeleteIcon fontSize="small" cursor="pointer" onClick={() => handleDeleteSong(song.id, rowIndex)}/>
                                                         ) : null}
-                                                        {column.id === 'titulo' && columnIndex === 1 ? (
-                                                            <span>{song.titulo}</span>
+                                                        {column.id === 'title' && columnIndex === 1 ? (
+                                                            <span>{song.title}</span>
                                                         ) : null}
-                                                        {column.id === 'duracion' && columnIndex === 2 ? (
-                                                            <span>{formatDuration(song.duracion)}</span>
-                                                        ) : null}
-                                                        {column.id === 'album' && columnIndex === 3 ? (
-                                                            <span>{song.album.titulo}</span>
+                                                        {column.id === 'genre' && columnIndex === 2 ? (
+                                                            <span>{song.genre}</span>
                                                         ) : null}
                                                     </TableCell>
                                                 ))}
@@ -243,80 +257,81 @@ const ArtistPage = ({client}) => {
                                 </Table>
                             </TableContainer>
                         </TableContainerStyled>
-                    </PlaylistContainer>
+                    </CollectionContainer>
                 </BodyContainer>
             </SpotifyBody>
-          <Footer />
           {deleteAlertData && (
                 <Overlay>
                     <AlertContainer>
-                    <AlertTitle>Eliminar canción</AlertTitle>
+                    <AlertTitle>Delete song</AlertTitle>
                     <AlertText>
-                        ¿Estás seguro de que deseas eliminar la canción "{deleteAlertData?.songTitle}"?
+                        Are you sure you want to delete the song "{deleteAlertData?.songTitle}"?
                     </AlertText>
                     <ButtonContainer>
-                        <StyledButtonSecondary style={{width: '50%', marginRight: '5px'}} onClick={handleDeleteCancel}>Cancelar</StyledButtonSecondary>
+                        <StyledButtonSecondary style={{width: '50%', marginRight: '5px'}} onClick={handleDeleteCancel}>Cancel</StyledButtonSecondary>
                         <StyledButton style={{backgroundColor: '#FF5630', width: '50%', marginLeft: '5px'}} onClick={() => handleDeleteConfirm()}>
-                        Eliminar
+                        Delete
                         </StyledButton>
                     </ButtonContainer>
                     </AlertContainer>
                 </Overlay>
             )}
             {isEditAlertOpen && (
-                // <Overlay>
-                    <CustomEditAlert>
-                        <EditAlertContent>
-                            <EditAlertTitle>Editar artista</EditAlertTitle>
-                            <EditAlertText>
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Nombre</Label>
-                                <Input
-                                    type="text"
-                                    value={editedArtist.nombre}
-                                    onChange={event => setEditedArtist({ ...editedArtist, nombre: event.target.value })}
-                                />
+                <CustomEditAlert>
+                    <EditAlertContent>
+                        <EditAlertTitle>Edit artist</EditAlertTitle>
+                        <EditAlertText>
+                            <Label style={{marginBottom: '0px', marginTop: '10px'}}>Name</Label>
+                            <Input
+                                type="text"
+                                value={editedArtist.name}
+                                onChange={event => setEditedArtist({ ...editedArtist, name: event.target.value })}
+                            />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Nacionalidad</Label>
-                                <Input
-                                    type="text"
-                                    value={editedArtist.nacionalidad}
-                                    onChange={event => setEditedArtist({ ...editedArtist, nacionalidad: event.target.value })}
-                                />
+                            <Label style={{marginBottom: '0px', marginTop: '10px'}}>Nationality</Label>
+                            <Input
+                                type="text"
+                                value={editedArtist.nationality}
+                                onChange={event => setEditedArtist({ ...editedArtist, nationality: event.target.value })}
+                            />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Número de seguidores</Label>
-                                <Input
-                                    type="text"
-                                    value={editedArtist.nro_seguidores}
-                                    onChange={event => setEditedArtist({ ...editedArtist, nro_seguidores: event.target.value })}
-                                />
+                            <Label style={{marginBottom: '0px', marginTop: '10px'}}>Followers</Label>
+                            <Input
+                                type="text"
+                                value={editedArtist.followers}
+                                onChange={event => setEditedArtist({ ...editedArtist, followers: event.target.value })}
+                            />
 
-                                <Label style={{marginBottom: '0px', marginTop: '10px'}}>Portada</Label>
-                                <Input
-                                    type="text"
-                                    value={editedArtist.portada}
-                                    onChange={event => setEditedArtist({ ...editedArtist, portada: event.target.value })}
-                                />
-                            </EditAlertText>
-                            <EditAlertButtonContainer>
-                                <StyledButtonSecondary onClick={handleCloseAlert}>Cancel</StyledButtonSecondary>
-                                <StyledButton onClick={handleSaveButtonClick}>Save</StyledButton>
-                            </EditAlertButtonContainer>
-                        </EditAlertContent>
-                    </CustomEditAlert>
-                // </Overlay>
-                
+                            <Label style={{marginBottom: '0px', marginTop: '10px'}}>Cover</Label>
+                            <Button
+                                component="label"
+                                role={undefined}
+                                variant="contained"
+                                tabIndex={-1}
+                                startIcon={<CloudUploadIcon />}
+                            >
+                                Upload file
+                                <VisuallyHiddenInput type="file" onChange={handleFileChange} />
+                            </Button>
+                        </EditAlertText>
+                        <EditAlertButtonContainer>
+                            <StyledButtonSecondary onClick={handleCloseAlert}>Cancel</StyledButtonSecondary>
+                            <StyledButton onClick={handleSaveButtonClick}>Save</StyledButton>
+                        </EditAlertButtonContainer>
+                    </EditAlertContent>
+                </CustomEditAlert>
             )}
             {deleteArtistAlertData && (
                 <Overlay>
                     <AlertContainer>
-                    <AlertTitle>Eliminar artista</AlertTitle>
+                    <AlertTitle>Delete artist</AlertTitle>
                     <AlertText>
-                        ¿Estás seguro de que deseas eliminar el artista "{artist?.nombre}"?
+                        Are you sure you want to delete the artist "{artist?.name}"?
                     </AlertText>
                     <ButtonContainer>
-                        <StyledButtonSecondary style={{width: '50%', marginRight: '5px'}} onClick={handleDeleteCancel}>Cancelar</StyledButtonSecondary>
+                        <StyledButtonSecondary style={{width: '50%', marginRight: '5px'}} onClick={handleDeleteCancel}>Cancel</StyledButtonSecondary>
                         <StyledButton style={{backgroundColor: '#FF5630', width: '50%', marginLeft: '5px'}} onClick={() => handleDeleteArtistConfirm()}>
-                        Eliminar
+                        Delete
                         </StyledButton>
                     </ButtonContainer>
                     </AlertContainer>
@@ -327,4 +342,3 @@ const ArtistPage = ({client}) => {
 }
 
 export default ArtistPage;
-

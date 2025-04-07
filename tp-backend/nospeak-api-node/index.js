@@ -17,12 +17,13 @@ mongoose.connection.on('connected', () => {
 app.use(express.json());
 
 app.use(cors({
-  origin: 'https://nospeak-client.vercel.app', 
+  origin: ['https://nospeak-client.vercel.app', 'http://localhost:3000'],
   credentials: true,
 }));
 
 app.use('/api', apiRoutes); 
 const PORT = process.env.PORT || 9000;
-app.listen(PORT, () => {
-  console.log(`Servidor en funcionamiento en el puerto ${PORT}`);
+const HOST = process.env.HOST || 'localhost';
+app.listen(PORT, HOST, () => {
+  console.log(`Servidor en funcionamiento en http://${HOST}:${PORT}`);
 });

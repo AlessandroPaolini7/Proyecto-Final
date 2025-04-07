@@ -11,9 +11,25 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+
+# Load .env file
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(env_path)
+
+# ... other settings ...
+
+# Add OpenAI API key to settings
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+# Add Tavily API key to settings
+TAVILY_API_KEY = os.getenv('TAVILY_API_KEY')
 
 
 # Quick-start development settings - unsuitable for production

@@ -1,13 +1,13 @@
 import styled from "styled-components";
 
-const PlaylistContainer = styled.div`
+const CollectionContainer = styled.div`
 display: flex;
 flex-direction: column;
 height: 100%;
 width: 100%;
 border-radius: 5px;
 overflow: hidden;
-background-image: linear-gradient(to bottom, #FFA130, #000);
+background-image: linear-gradient(to bottom, #faa130, #000);
 font-family: var(--font-family,CircularSp,CircularSp-Arab,CircularSp-Hebr,CircularSp-Cyrl,CircularSp-Grek,CircularSp-Deva,var(--fallback-fonts,sans-serif));
 `
 
@@ -44,7 +44,7 @@ width: 78%;
 color: #fff;
 `
 
-const ImagePlaylist = styled.img`
+const ImageCollection = styled.img`
 block-size: 80%;
 inline-size: 80%;
 margin: auto;
@@ -108,6 +108,6 @@ const ComboBox = styled.select`
 
 
 
-export {PlaylistContainer, CardContainer, TableContainerStyled, CardLeftContainer, 
-CardRightContainer, ImagePlaylist, StyledH1, FormContainer, ColumnForm, ComboBox, 
+export {CollectionContainer, CardContainer, TableContainerStyled, CardLeftContainer, 
+CardRightContainer, ImageCollection, StyledH1, FormContainer, ColumnForm, ComboBox, 
 ColumnContainer}
