@@ -25,7 +25,7 @@ import {
 
 import CircularIndeterminate from '../../styled-components/Extras/CircularIndeterminate.jsx'; // Importa tu componente de carga
 import Alert from '@mui/material/Alert';
-import PersonAddDisabledIcon from '@mui/icons-material/PersonAddDisabled';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 import { 
     Overlay,
@@ -113,7 +113,7 @@ const User = ({ client }) => {
                             <>
                                 <CardContainer>
                                     <CardLeftContainer>
-                                        <ImageCollection src={`https://i.pravatar.cc/150?u=${currentUser.name}`} />
+                                        <ImageCollection src={currentUser.picture} />
                                     </CardLeftContainer>
 
                                     <CardRightContainer style={{ paddingBottom: '30px', width: '80%' }}>
@@ -122,7 +122,7 @@ const User = ({ client }) => {
                                         <p style={{ margin: '0' }}>{currentUser.reviewsCount} reviews.</p>
                                     </CardRightContainer>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '10%' }}>
-                                        <PersonAddDisabledIcon 
+                                        <PersonAddIcon 
                                             style={{ color: 'white', cursor: 'pointer', width: '40%', height: '40%' }} 
                                             onClick={() => setDeleteAlertData(true)} 
                                         />

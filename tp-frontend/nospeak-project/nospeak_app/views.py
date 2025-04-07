@@ -113,6 +113,7 @@ from django.http import JsonResponse
 from nospeak_app.recommendations.multi_recommendations import *
 from django.views.decorators.csrf import csrf_exempt
 import json
+from .chatbot.chipibot import run
 
 
 class ArtistaList(generics.ListCreateAPIView):
@@ -254,9 +255,6 @@ class LogoutView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
-
 @csrf_exempt
 def get_recommendations(request):
     if request.method == 'POST':
@@ -270,4 +268,30 @@ def get_recommendations(request):
             return JsonResponse({'recommended_songs': recommended_songs})
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def chat_with_bot(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            question = data.get('question', '')
+            chat_history = data.get('chat_history', [])
+            
+            if not question:
+                return JsonResponse({'error': 'Question is required'}, status=400)
+            
+            # Run the chatbot and get both response and plot filename
+            response, plot_data = run(question, chat_history)
+            
+            return JsonResponse({
+                'response': response,
+                'plot_data': plot_data
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+            
     return JsonResponse({'error': 'Invalid request method'}, status=405)

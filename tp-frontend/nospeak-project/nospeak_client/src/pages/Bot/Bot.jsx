@@ -1,25 +1,51 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SpotifyBody } from '../Home/styles';
 import Sidebar from '../../styled-components/Sidebar/Sidebar';
-import { BodyContainer } from '../../styled-components/Body/styles';
+import { BodyContainer } from './styles';
 import { StyledButton, Input } from '../../styled-components/styles';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import Avatar from '@mui/material/Avatar';
 import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { CircularProgress } from '@mui/material';
+import ReactMarkdown from 'react-markdown';
+import CircularIndeterminate from '../../styled-components/Extras/CircularIndeterminate.jsx';
 
+const ThinkingIndicator = () => (
+  <div style={{ 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '4px',
+    padding: '8px 12px',
+    backgroundColor: '#333',
+    borderRadius: '10px',
+    color: '#FFA130'
+  }}>
+    <div style={{ 
+      display: 'flex', 
+      gap: '4px', 
+      alignItems: 'center' 
+    }}>
+      <CircularProgress size={20} style={{ color: '#FFA130' }} />
+    </div>
+  </div>
+);
 
 export default function Bot({ client }) {
   const [messages, setMessages] = useState([
-    { id: 1, text: "Hello! How can I assist you today?", sender: 'bot', plot_url: null },
-    { id: 2, text: "Hi, I work as a community manager and I'm about to launch a campaign for our product. I want to add some pictures of a well-known singer, like Taylor Swift, but I don't know how she's doing lately. Make a chart showing the average user ratings for her last 10 songs.", sender: 'user', plot_url: null },
-    { id: 3, text: "I'm processing your request. Please wait.", sender: 'bot', plot_url: null },
-    { id: 4, text: "Here is the line chart showing the score review of the last 10 Taylor Swift songs, with scores ranging from 4.8 to 3.3. The chart displays a downward trend in the ratings, as reflected in the decreasing scores from 'Carolina' to 'Delicate'", sender: 'bot', plot_url: process.env.PUBLIC_URL + '/output.png' },
-
   ]);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
+  const [loading, setLoading] = useState(true);
 
   const user = useSelector(state => state.user.user);
+
+  useEffect(() => {
+    // Simulate loading time or add actual initialization logic
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -27,34 +53,80 @@ export default function Bot({ client }) {
 
   useEffect(scrollToBottom, [messages]);
 
-  const handleSend = () => {
+  // const checkPlotExists = async (filename) => {
+  //   try {
+  //     const plotPath = process.env.PUBLIC_URL + `/plots/${filename}`;
+  //     const response = await fetch(plotPath, { method: 'HEAD' });
+  //     return response.ok ? plotPath : null;
+  //   } catch (error) {
+  //     console.error('Error checking plot:', error);
+  //     return null;
+  //   }
+  // };
+
+  const handleSend = async () => {
     if (input.trim()) {
-      setMessages(prev => [...prev, { id: prev.length + 1, text: input, sender: 'user' }]);
+      setMessages(prev => [...prev, { 
+        id: prev.length + 1, 
+        text: input, 
+        sender: 'user',
+        plot_data: null 
+      }]);
+      
+      setMessages(prev => [...prev, {
+        id: prev.length + 1,
+        isLoading: true,
+        sender: 'bot',
+        plot_data: null
+      }]);
+
+      try {
+        const chatHistory = messages.map(msg => ({
+          content: msg.text,
+          sender: msg.sender
+        }));
+
+        console.log("Chat history: ", chatHistory);
+
+        const response = await axios.post('http://127.0.0.1:8000/nospeak-app/api/chat/', {
+          question: input,
+          chat_history: chatHistory
+        });
+
+        const { response: botResponse, plot_data } = response.data;
+        
+        setMessages(prev => prev.slice(0, -1));
+
+        setMessages(prev => [...prev, {
+          id: prev.length + 1,
+          text: botResponse,
+          sender: 'bot',
+          plot_data: plot_data
+        }]);
+
+      } catch (error) {
+        console.error('Error sending message:', error);
+        setMessages(prev => [...prev.slice(0, -1), {
+          id: prev.length,
+          text: "Sorry, I encountered an error. Please try again.",
+          sender: 'bot',
+          plot_data: null
+        }]);
+      }
+
       setInput('');
-      // Simulate bot response
-      setTimeout(() => {
-        setMessages(prev => [...prev, { id: prev.length + 1, text: "I'm processing your request. Please wait.", sender: 'bot' }]);
-      }, 1000);
     }
   };
+  if (loading) {
+    return <CircularIndeterminate />;
+  }
 
   return (
     <SpotifyBody>
       <Sidebar client={client} />
-      <BodyContainer css={`
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        background-color: #121212;
-      `}>
+      <BodyContainer>
         <h1 style={{ color: '#fff', margin: '20px 0 20px 20px' }}>Chipi Bot</h1>
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '0 20px',
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
+        <div className="messages-container">
           {messages.map((message) => (
             <div key={message.id} style={{
               display: 'flex',
@@ -70,27 +142,38 @@ export default function Bot({ client }) {
                 src={message.sender === 'user' ? `https://i.pravatar.cc/150?u=${user.name}` : process.env.PUBLIC_URL + '/logo_nospeak_bot.png'}
               >
               </Avatar>
-              <div style={{
-                maxWidth: '60%',
-                padding: '10px',
-                borderRadius: '10px',
-                backgroundColor: message.sender === 'user' ? '#333' : '#333',
-                color: '#fff'
-              }}>
-                {message.text}
-                {message.plot_url && <img src={message.plot_url} alt="plot" style={{ width: '80%', marginTop: '10px' }} />}
-              </div>
+              {message.isLoading ? (
+                <ThinkingIndicator />
+              ) : (
+                <div style={{
+                  maxWidth: '60%',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  backgroundColor: '#333',
+                  color: '#fff'
+                }}>
+                  <ReactMarkdown components={{
+                    // Override default paragraph styling
+                    p: ({node, ...props}) => (
+                      <p style={{ margin: '0', padding: '0' }} {...props} />
+                    )
+                  }}>
+                    {message.text}
+                  </ReactMarkdown>
+                  {message.plot_data && (
+                    <img 
+                      src={`data:image/png;base64,${message.plot_data}`} 
+                      alt="plot" 
+                      style={{ width: '80%', marginTop: '10px' }} 
+                    />
+                  )}
+                </div>
+              )}
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
-        <div style={{
-          display: 'flex',
-          padding: '20px',
-          marginBottom: '0px',
-          borderTop: '1px solid #333',
-          height: '40px',
-        }}>
+        <div className="input-container">
           <Input
             type="text"
             value={input}

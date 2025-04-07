@@ -37,8 +37,13 @@ export default function Register({ client }) {
   const [isArtist, setIsArtist] = useState(false);
 
   const [goToHome, setGoToHome] = useState(false);
+  const [goToPricing, setGoToPricing] = useState(false);
   if (goToHome) {
     return <Navigate to="/home" />;
+  }
+
+  if (goToPricing) {
+    return <Navigate to="/pricing" />;
   }
 
   const isEmailValid = (email) => {
@@ -125,7 +130,7 @@ export default function Register({ client }) {
         }));
 
         setTimeout(() => {
-          setGoToHome(true);
+          setGoToPricing(true);
         }, 5000);
       } else {
         console.error('Error al registrar el usuario:', response_register.data.message);

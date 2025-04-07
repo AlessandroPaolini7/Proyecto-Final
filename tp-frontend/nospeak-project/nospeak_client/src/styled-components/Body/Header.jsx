@@ -5,12 +5,33 @@ import { Avatar } from '@mui/material';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-const Header = ({ users, setFilteredUsers, songs=null, setFilteredSongs=null }) => {
+const Header = ({ users, setFilteredUsers, songs=null, setFilteredSongs=null, client }) => {
   const [goToAccount, setGoToAccount] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
   const user = useSelector(state => state.user.user);
   const [placeholder, setPlaceholder] = useState("");
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if(user) {
+          const response = await client.get(`/api/user/${user.id}`);
+          if (response) {
+            setUserData(response.data);
+            setLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
 
   useEffect(() => {
     if (location.pathname === "/recommended-users" || location.pathname === "/following-users" || location.pathname === "/home") {
@@ -57,10 +78,10 @@ const Header = ({ users, setFilteredUsers, songs=null, setFilteredSongs=null }) 
         />
       </HeaderLeft>
       <HeaderRight>
-        <Avatar src={`https://i.pravatar.cc/150?u=${user.name}`} />
+        <Avatar src={userData?.picture || user?.picture} />
         {user && (
           <h4 style={{ color: 'white' }} onClick={() => setGoToAccount(true)}>
-            {user.name}
+            {userData?.name || user?.name}
           </h4>
         )}
       </HeaderRight>

@@ -99,7 +99,21 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
           reviewId: song.reviewId || '', 
           currentReview: song.userReview || ''
         });
-      };
+    };
+
+    const handleCommentClick = (song, index) => {
+        if (song.userReview || song.userRating) {
+            setReviewAlertData({
+                songId: song._id,
+                songTitle: song.title,
+                indexToRemove: index,
+                currentRating: song.userRating || 0,
+                reviewId: song.reviewId,
+                currentReview: song.userReview || ''
+            });
+        }
+    };
+
     return (
         <>
             <TitleContainer>
@@ -125,18 +139,19 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
                                 </Typography>
                             </CardContent>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pl: 1, pb: 1}}>
-                                    {user.isAdmin && (
+                                {user.isAdmin && (
                                     <IconButton aria-label="delete" onClick={() => handleDelete(song._id, index)}>
                                         <StyledDeleteIcon sx={{ color: 'white' }} />
-                                    </IconButton>)}
-                                    {user.isAdmin && (
+                                    </IconButton>
+                                )}
+                                {user.isAdmin && (
                                     <IconButton aria-label="edit">
                                         <Link to={{ pathname: `/song/${song._id}` }}>
                                             <StyledEditIcon sx={{ color: 'white' }} />
                                         </Link>
                                     </IconButton>
-                                    )}
-                                    <Rating
+                                )}
+                                <Rating
                                     name={`rating-${song._id}`}
                                     value={song.userRating || 0}
                                     precision={0.5}
@@ -147,16 +162,27 @@ export default function MediaControlCard({client, songs, setSongs, setDeleteAler
                                         setHover(newHover);
                                     }}
                                     emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
+                                />
+                                <IconButton 
+                                    onClick={() => handleReview(song._id, index, song.userRating || 0)}
+                                    sx={{
+                                        padding: 0,
+                                        marginLeft: 2,
+                                        marginRight: 2,
+                                    }}
+                                >
+                                    <CommentIcon
+                                        sx={{
+                                            height: 25,
+                                            width: 25,
+                                            color: (song.userReview || song.userRating) ? 'white' : 'grey',
+                                            cursor: (song.userReview || song.userRating) ? 'pointer' : 'default',
+                                            '&:hover': {
+                                                color: (song.userReview || song.userRating) ? '#ffa130' : 'grey',
+                                            }
+                                        }}
                                     />
-                                        <CommentIcon
-                                            sx={{
-                                                height: 25,
-                                                width: 25,
-                                                marginLeft: 2,
-                                                marginRight: 2,
-                                                color: 'grey',
-                                            }}
-                                        />
+                                </IconButton>
                             </Box>
                             
                         </Box>

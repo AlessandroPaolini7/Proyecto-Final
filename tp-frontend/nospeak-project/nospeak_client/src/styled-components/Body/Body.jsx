@@ -67,12 +67,12 @@ export default function Body({ client }) {
 
     React.useEffect(() => {
         if (reviewAlertData) {
-          setRating(reviewAlertData.currentRating || 0);
-          setReview('');
+            setRating(reviewAlertData.currentRating || 0);
+            setReview(reviewAlertData.currentReview || '');
         }
-      }, [reviewAlertData]);
+    }, [reviewAlertData]);
 
-      React.useEffect(() => {
+    React.useEffect(() => {
         const fetchSongs = async () => {
           try {
             const [songsResponse, reviewsResponse] = await Promise.all([
@@ -102,42 +102,45 @@ export default function Body({ client }) {
     
       const handleSaveReview = async () => {
         try {
-          let response;
-          if (reviewAlertData.reviewId) {
-            response = await axios.patch(`/api/reviews/${reviewAlertData.reviewId}`, {
-              score: rating,
-              description: review
-            });
-          } else {
-            response = await axios.post('/api/reviews', {
-              song: reviewAlertData.songId,
-              user: user.id,
-              score: rating,
-              description: review
-            });
-          }
-    
-          if (response.status === 200 || response.status === 201) {
-            console.log('Review saved/updated successfully');
-            
-            const updatedSongs = songs.map(song => 
-              song._id === reviewAlertData.songId 
-                ? {...song, userRating: rating, userReview: review, reviewId: response.data._id}
-                : song
-            );
-            setSongs(updatedSongs);
-            setFilteredSongs(updatedSongs);
-            
-            setReviewAlertData({
-              ...reviewAlertData,
-              reviewId: response.data._id
-            });
-            
-            setReview('');
-            setRating(0);
-          }
+            let response;
+            const reviewData = {
+                score: rating,
+                description: review
+            };
+
+            if (reviewAlertData.reviewId) {
+                response = await axios.patch(`/api/reviews/${reviewAlertData.reviewId}`, reviewData);
+            } else {
+                response = await axios.post('/api/reviews', {
+                    song: reviewAlertData.songId,
+                    user: user.id,
+                    ...reviewData
+                });
+            }
+
+            if (response.status === 200 || response.status === 201) {
+                console.log('Review saved/updated successfully');
+                
+                const updatedSongs = songs.map(song => 
+                    song._id === reviewAlertData.songId 
+                        ? {
+                            ...song, 
+                            userRating: rating, 
+                            userReview: review, 
+                            reviewId: response.data._id
+                        }
+                        : song
+                );
+                setSongs(updatedSongs);
+                setFilteredSongs(updatedSongs);
+                
+                // Reset the form and close the alert
+                setReview('');
+                setRating(0);
+                setReviewAlertData(null);
+            }
         } catch (error) {
-          console.error('Error saving/updating review:', error);
+            console.error('Error saving/updating review:', error);
         }
       };
 
@@ -145,7 +148,7 @@ export default function Body({ client }) {
     return (
         <>
             <BodyContainer>
-                <Header songs={songs} setFilteredSongs={setFilteredSongs} />
+                <Header songs={songs} setFilteredSongs={setFilteredSongs} client={client}/>
                 <MediaControlCard
                     client={client}
                     songs={filteredSongs} 

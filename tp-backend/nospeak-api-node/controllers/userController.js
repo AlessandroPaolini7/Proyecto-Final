@@ -33,7 +33,15 @@ exports.getUserById = async (req, res) => {
       ...user.toObject(),
       followersCount,
       reviewsCount,
-      collectionCount
+      collectionCount,
+      reviews: await Review.find({ user: user._id })
+        .populate({
+          path: 'song',
+          populate: {
+            path: 'artist',
+            select: 'name picture'
+          }
+        })
     };
 
     return res.status(200).json(userWithStats);
@@ -45,29 +53,27 @@ exports.getUserById = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    const { name, email, password, phone_number, isAdmin, picture} = req.body;
-
     const user = await User.findById(req.params.id);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    user.name = name;
-    user.email = email;
-    user.phone_number = phone_number;
-    user.isAdmin = isAdmin;
-    user.picture = picture;
-
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      user.password = hashedPassword;
+    // Only update fields that are present in req.body
+    for (const [key, value] of Object.entries(req.body)) {
+      if (key === 'password') {
+        const hashedPassword = await bcrypt.hash(value, 10);
+        user[key] = hashedPassword;
+      } else {
+        user[key] = value;
+      }
     }
 
     await user.save();
 
     res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {
+    console.error('Error updating user:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -173,7 +179,7 @@ exports.getUserFollowers = async (req, res) => {
   }
 };
 
-// Obtener usuarios que sigue un usuario con estadísticas adicionales
+// Obtener usuarios que sigue un usuario con estadísticas adicionales y última reseña
 exports.getUserFollowing = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -181,13 +187,44 @@ exports.getUserFollowing = async (req, res) => {
     const followingRelations = await FollowRelation.find({ follower: userId })
       .populate('following');
 
-    const followingWithStats = await Promise.all(followingRelations.map(async (relation) => {
+    const followingWithStatsAndReview = await Promise.all(followingRelations.map(async (relation) => {
       const followingUser = relation.following;
       const stats = await exports.getUserStats(followingUser._id);
-      return { ...followingUser.toObject(), ...stats };
+      
+      // Obtener la última reseña del usuario
+      const lastReview = await Review.findOne({ user: followingUser._id })
+        .sort({ creation_date: -1 })
+        .limit(1)
+        .populate({
+          path: 'song',
+          populate: { path: 'artist' }
+        });
+
+      return { 
+        ...followingUser.toObject(), 
+        ...stats,
+        lastReview: lastReview ? {
+          _id: lastReview._id,
+          description: lastReview.description,
+          score: lastReview.score,
+          creationDate: lastReview.creation_date,
+          song: lastReview.song ? {
+            _id: lastReview.song._id,
+            title: lastReview.song.title,
+            genre: lastReview.song.genre,
+            artist: lastReview.song.artist ? {
+              _id: lastReview.song.artist._id,
+              name: lastReview.song.artist.name,
+              nationality: lastReview.song.artist.nationality,
+              followers: lastReview.song.artist.followers,
+              picture: lastReview.song.artist.picture
+            } : null
+          } : null
+        } : null
+      };
     }));
 
-    res.status(200).json(followingWithStats);
+    res.status(200).json(followingWithStatsAndReview);
   } catch (error) {
     res.status(500).json({ message: 'Internal server error' });
   }

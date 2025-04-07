@@ -100,7 +100,7 @@ const RecommendendUsers = ({ client }) => {
                 <BodyContainer css={`align-items: center;`}>
                     <CollectionContainer>
                     <div style={{paddingLeft: '10px'}}>
-                        <Header users={usersToShow} setFilteredUsers={setUsersToShow}/>
+                        <Header users={usersToShow} setFilteredUsers={setUsersToShow} client={client}/>
                         <CardContainer style={{flexDirection: 'column', padding: '10px', paddingLeft: '10px', marginBottom: '10px'}}>
                         <StyledH1 style={{ marginTop: '0px', marginBottom: '0px', fontSize: '2em', color: 'white' }}>Music lovers and critics  — find members like you.</StyledH1>
                             <div style={{ marginBottom: '15px', marginTop: '10px' }}>
@@ -110,7 +110,7 @@ const RecommendendUsers = ({ client }) => {
                                 {usersToShow.slice(0, 5).map((user) => (
                                     <Link key={user._id} to={`/user/${user._id}`} style={{textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', marginRight: '30px'}}>
                                         <UserContainer key={user._id}>
-                                            <Avatar sx={{ height: '100px', width: '100px' }} src={`https://i.pravatar.cc/150?u=${user.name}`} />
+                                            <Avatar sx={{ height: '100px', width: '100px' }} src={user.picture} />
                                             <UserInfo>
                                                 <Username style={{marginBottom: '5px'}}>{user.name}</Username>
                                                 <Stats style={{color:'white'}}>
@@ -153,7 +153,7 @@ const RecommendendUsers = ({ client }) => {
                                                         {column.id === 'username' ? (
                                                             <Link key={index} to={`/user/${user._id}`} style={{ width: 100, textDecoration: 'none', color: 'inherit' }}>
                                                                 <AvatarContainer>
-                                                                    <Avatar src={`https://i.pravatar.cc/150?u=${user.name}`} />
+                                                                    <Avatar src={user.picture} />
                                                                     <UserInfo>
                                                                         <Username>{user.name}</Username>
                                                                         <Reviews>{user.collectionCount} collections</Reviews>

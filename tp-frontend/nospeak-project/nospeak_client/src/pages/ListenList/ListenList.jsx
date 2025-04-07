@@ -230,7 +230,7 @@ const ListenList = ({client}) => {
                     <CollectionContainer>
                         <CardContainer>
                             <CardLeftContainer>
-                                <ImageCollection src={listenList.picture}></ImageCollection>
+                                <ImageCollection src={"https://picsum.photos/id/222/300/300"}></ImageCollection>
                             </CardLeftContainer>
                             
                             <CardRightContainer style={{paddingBottom: '30px'}}>

@@ -6,10 +6,6 @@ import numpy as np
 from sklearn.preprocessing import normalize
 
 
-def get_vector_for_track(trackname):
-    idx = list(data_songs.index[data_songs['Track Name'] == trackname])[0]
-    return count_matrix[idx]
-
 def get_recommendations_for_vector(track_vector):
     if track_vector.ndim == 1:
         track_vector = track_vector.reshape(1, -1)
@@ -38,9 +34,16 @@ def get_recommendations_for_vector(track_vector):
     return recommended_songs
 
 
+def get_vector_for_track(trackname):
+    matching_songs = data_songs.index[data_songs['Track Name'] == trackname]
+    if len(matching_songs) == 0:
+        print(f"Warning: Song '{trackname}' not found in database")
+        return None
+    return count_matrix[matching_songs[0]]
+
 def multi_recommendations(tracks_with_scores):
-    # Si tracknames está vacío, devolver 10 canciones aleatorias
-    if not tracks_with_scores:  # Verifica si tracks_with_scores está vacío
+    # If tracknames is empty, return 10 random songs
+    if not tracks_with_scores:
         random_songs = data_songs[["Track Name", "Artist"]].drop_duplicates().sample(n=10).to_numpy()
         return [
             {"titulo": song[0], "artista": song[1]}
@@ -49,16 +52,31 @@ def multi_recommendations(tracks_with_scores):
 
     weighted_vectors = []
     total_score = 0
+    valid_tracks = []
 
     for track in tracks_with_scores:
         trackname = track["trackname"]
         score = track["score"]
-        vector = np.asarray(get_vector_for_track(trackname).todense())
+        vector = get_vector_for_track(trackname)
+        
+        if vector is not None:
+            vector = np.asarray(vector.todense())
+            if not np.isnan(vector).any():
+                vector = normalize(vector)
+                weighted_vectors.append(vector * score)
+                total_score += score
+                valid_tracks.append(track)
+        else:
+            print(f"Skipping track '{trackname}' as it was not found in the database")
 
-        if not np.isnan(vector).any():
-            vector = normalize(vector)
-            weighted_vectors.append(vector * score)
-            total_score += score
+    # If no valid tracks were found, return random recommendations
+    if not weighted_vectors:
+        print("No valid tracks found. Returning random recommendations.")
+        random_songs = data_songs[["Track Name", "Artist"]].drop_duplicates().sample(n=10).to_numpy()
+        return [
+            {"titulo": song[0], "artista": song[1]}
+            for song in random_songs
+        ]
 
     avg_vector = np.sum(weighted_vectors, axis=0)
 
@@ -67,7 +85,6 @@ def multi_recommendations(tracks_with_scores):
     else:
         avg_vector = np.zeros_like(avg_vector)
 
-
     if avg_vector.ndim == 1:
         avg_vector = avg_vector.reshape(1, -1)
     elif avg_vector.ndim == 0:
@@ -75,9 +92,10 @@ def multi_recommendations(tracks_with_scores):
 
     recommended_songs = get_recommendations_for_vector(avg_vector)
 
-    # Eliminar duplicados y completar con canciones aleatorias
-    unique_track_names = set([track["trackname"] for track in tracks_with_scores])
+    # Remove duplicates and fill with random songs
+    unique_track_names = set([track["trackname"] for track in valid_tracks])
     unique_recommended_songs = []
+    
     for song in recommended_songs:
         if song["titulo"] not in unique_track_names:
             unique_recommended_songs.append(song)
@@ -85,32 +103,17 @@ def multi_recommendations(tracks_with_scores):
             if len(unique_recommended_songs) == 10:
                 break
 
-    # Si hay menos de 10 canciones, completar con canciones aleatorias
+    # If less than 10 songs, fill with random songs
     if len(unique_recommended_songs) < 10:
         remaining_count = 10 - len(unique_recommended_songs)
         all_tracks = data_songs[["Track Name", "Artist"]].drop_duplicates()
-
-        # Filtrar las canciones que ya están en unique_track_names
         remaining_songs = all_tracks[~all_tracks["Track Name"].isin(unique_track_names)]
-
-        # Seleccionar aleatoriamente las canciones restantes
         random_songs = remaining_songs.sample(n=remaining_count).to_numpy()
 
-        for song in random_songs:
-            unique_recommended_songs.append({
-                "titulo": song[0],  # 'Track Name' en la primera columna
-                "artista": song[1]  # 'Artist' en la segunda columna
-            })
-
-    # Si no hay ninguna canción recomendada, completar las 10 canciones con canciones aleatorias
-    if len(unique_recommended_songs) == 0:
-        random_songs = data_songs[["Track Name", "Artist"]].drop_duplicates().sample(n=10).to_numpy()
         for song in random_songs:
             unique_recommended_songs.append({
                 "titulo": song[0],
                 "artista": song[1]
             })
-
-    print(f"Unique recommended songs: {unique_recommended_songs}")
 
     return unique_recommended_songs

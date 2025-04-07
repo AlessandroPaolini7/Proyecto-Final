@@ -17,7 +17,7 @@ export function Inicio() {
             <img src={process.env.PUBLIC_URL + '/logo_nospeak.png'} alt="logo" style={{ width: '50%', height: '60%' }}/>
             <ButtonContainer>
                 <StyledButton onClick={() => {setGoToLogin(true);}}>
-                        Login with NoSpeak
+                        Start your musical journey
                 </StyledButton>
             </ButtonContainer>
         </InicioContainer>

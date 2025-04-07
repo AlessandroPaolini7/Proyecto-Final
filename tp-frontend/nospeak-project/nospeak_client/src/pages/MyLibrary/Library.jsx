@@ -201,6 +201,7 @@ const Library = ({ client }) => {
       setIsComboBoxOpen(!isComboBoxOpen);
     } else {
       if (activeCategory === 'Collections') handleOptionClick('collection');
+      if (activeCategory === 'ListenLists') handleOptionClick('listenlist');
     }
   };
 
@@ -332,7 +333,7 @@ const Library = ({ client }) => {
       <SpotifyBody>
         <Sidebar client={client} />
         <BodyContainer css={`align-items: center;`}>
-          <Header />
+          <Header client={client}/>
           <h1 style={{ color: '#fff', marginLeft: '10px' }}>Library</h1>
 
           <NavContainer>
@@ -349,8 +350,8 @@ const Library = ({ client }) => {
             <IconContainer>
               <StyledAddCircle
                 sx={{
-                  color: user.isAdmin || activeCategory === 'Collections' ? '#FFA130' : 'gray',
-                  cursor: user.isAdmin || activeCategory === 'Collections' ? 'pointer' : 'not-allowed',
+                  color: user.isAdmin || activeCategory === 'Collections' || activeCategory === 'ListenLists' ? '#FFA130' : 'gray',
+                  cursor: user.isAdmin || activeCategory === 'Collections' || activeCategory === 'ListenLists' ? 'pointer' : 'not-allowed',
                 }}
                 onClick={handleComboBoxButtonClick}
               />
@@ -402,7 +403,7 @@ const Library = ({ client }) => {
               listenlistData.map((listenlist, index) => (
                 <Link key={index} to={`/listenlist/${listenlist._id}`}>
                   <CollectionBox key={index}>
-                    <CollectionImage src={`https://picsum.photos/300/300`}></CollectionImage>
+                    <CollectionImage src={`https://picsum.photos/id/222/300/300`}></CollectionImage>
                     <CollectionName>{listenlist.title}</CollectionName>
                   </CollectionBox>
                 </Link>

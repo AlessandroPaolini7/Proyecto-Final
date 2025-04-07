@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import ArtistaList, ArtistaDetail, AlbumList, AlbumDetail, CancionInfo, CancionList, CancionDetail, HistorialPorUsuarioView, PlaylistCreate, PlaylistInfo, UsuarioList, UsuarioDetail, PlaylistList, PlaylistDetail, RecomendacionList, RecomendacionDetail, HistorialList, HistorialDetail, CancionCreate
+from .views import ArtistaList, ArtistaDetail, AlbumList, AlbumDetail, CancionInfo, CancionList, CancionDetail, HistorialPorUsuarioView, PlaylistCreate, PlaylistInfo, UsuarioList, UsuarioDetail, PlaylistList, PlaylistDetail, RecomendacionList, RecomendacionDetail, HistorialList, HistorialDetail, CancionCreate, chat_with_bot
 from .views import LogoutView, RegistroUsuario, CustomAuthToken, CancionesPorArtistaView, CancionesPorAlbumView
 from . import views
 
@@ -35,4 +35,5 @@ urlpatterns = [
     path('historiales/', HistorialList.as_view(), name='historial-list'),
     path('historiales-usuario/<int:usuario_id>/', HistorialPorUsuarioView.as_view(), name='historial-por-usuario'),
     path('historiales/<int:pk>/', HistorialDetail.as_view(), name='historial-detail'),
+    path('chat/', chat_with_bot, name='chat-with-bot'),
 ]

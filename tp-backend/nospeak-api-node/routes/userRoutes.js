@@ -8,7 +8,7 @@ const { uploadProfilePicture, generateProfilePictureLink } = require('../middlew
 router.get('/', verifyToken, verifyRole, userController.getUsers);
 router.post('/', uploadProfilePicture, generateProfilePictureLink, userController.createUser);
 router.get('/:id', verifyToken, userController.getUserById);
-router.put('/:id', verifyToken, userController.updateUser);
+router.patch('/:id', verifyToken, userController.updateUser);
 router.delete('/:id', verifyToken, userController.deleteUser);
 router.get('/stats/:id', verifyToken, userController.getUserStats);
 router.get('/following/:id', verifyToken, userController.getUserFollowing);

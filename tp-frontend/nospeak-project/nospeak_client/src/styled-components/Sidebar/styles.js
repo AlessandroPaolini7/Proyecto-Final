@@ -8,6 +8,7 @@ const NavContainer = styled.div`
   background-color: #000;
   height: 8%;
   padding: 0 20px;
+  overflow: hidden;
   width: 100%;
   color: white;
   position: fixed;
@@ -29,10 +30,11 @@ const SidebarContainer = styled.div`
   display: flex;
   flex-direction: column;
   width: 20%;
-  height: 101vh;
+  height: 100vh;
   background-color: #000;
   min-width: 240px;
   color: #fff;
+  overflow: hidden;
   & img {
     height: 70px;
     padding: 10px;

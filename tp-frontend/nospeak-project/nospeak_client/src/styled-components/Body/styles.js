@@ -16,6 +16,7 @@ const BodyContainer = styled.div`
     width: 80%;
     background-color: #232323;
     padding: 10px;
+    overflow: hidden;
     @media (max-width: 798px) {
         width: 100%;
     }

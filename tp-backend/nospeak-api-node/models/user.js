@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -7,6 +6,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   phone_number: { type: String, required: true },
   isAdmin: { type: Boolean, default: false },
+  isPremium: { type: Boolean, default: false },
   picture: { type: String, required: false },
 });
 
